@@ -1,47 +1,18 @@
 # Arcus - API Gateway POC
 
-POC to integrate Azure API Management with our observability based on `Request-Id` according [W3C Trace-Context](https://www.w3.org/TR/trace-context/).
+POC to have end-to-end correlation stitching operations across services together in the Azure Application Insights Application Map.
 
 ![Arcus](https://raw.githubusercontent.com/arcus-azure/arcus/master/media/arcus.png)
 
-## Getting Started
+## Scope
 
-Before you can run this, you need to:
+Provide end-to-end correlation stitching operations across services together in the Azure Application Insights Application Map.
 
-1. Provision an Azure API Management instance with a self-hosted gateway
-2. Configure the gateway in Docker Compose
-3. Create a Bacon API based on the OpenAPI spec of our local API ([url](http://localhost:789/api/docs/index.html))
-4. Make Bacon API available locally
-5. Run solution with Docker Compose
-6. Get bacon by calling the self-hosted gateway - GET http://localhost:700/api/v1/bacon
+Depending on progress, we will include a message broker in the middle to see if we can plot it correctly on the Application Map as well.
 
-## Observability
+This POC will fully rely on Azure Application Insight's `TelemetryClient` to easily set it up correctly and see how we can port this to Arcus Observability & Serilog.
 
-End-to-end correlation from Azure API Management is provided until the database:
-
-![Overview](media/observability-example.png)
-
-## Action items
-
-- [ ] Be more open and extensible in Arcus ([Arcus #143](https://github.com/arcus-azure/arcus/issues/143))
-- [ ] Incorporate hacks upstream to be able to interpret, track and use parent id
-- [ ] Incorporate hacks upstream allowing users to re-use upstream service operation id and tracking them correspondingly
-- [ ] Provide support for tracking parent operation IDs, based on the guidance ([docs](https://docs.microsoft.com/en-us/azure/azure-monitor/app/correlation#data-model-for-telemetry-correlation), *see below*)
-
-_Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
-
-## Clarification Required
-
-- [ ] Should we generate ID's according to W3C (`System.Diagnostics.Activity`)?
-- [ ] Why are the correlation options part of Arcus Observability if they are scoped to Web APIs?
-
-## Out-of-scope
-
-Doing end-to-end correlation across multiple components and back is not in scope.
-
-This needs to be improved in Arcus and probably should extend this POC or start a new one.
-
-### Telemetry Correlation
+### Official Telemetry Correlation Guidance
 
 As per [the guidance](https://docs.microsoft.com/en-us/azure/azure-monitor/app/correlation#data-model-for-telemetry-correlation):
 
@@ -60,3 +31,32 @@ This means that we are handling the operation ID (aka `operation_Id`) correctly 
 - Keep track of the unique IDs for dependency telemetry items, to use as parent ID for other telemetry
 
 Learn more in [this example](https://docs.microsoft.com/en-us/azure/azure-monitor/app/correlation#example).
+
+### What is not included
+
+- Integrate Azure API Management with our Arcus Observability (see [arcus-azure/arcus-api-gateway-poc](https://github.com/arcus-azure/arcus-api-gateway-poc) instead)
+
+## Getting Started
+
+Before you can run this, you need to:
+
+1. Provision an Azure API Management instance with a self-hosted gateway
+2. Configure the gateway in Docker Compose
+3. Create a Bacon API based on the OpenAPI spec of our local API ([url](http://localhost:789/api/docs/index.html))
+4. Make Bacon API available locally
+5. Run solution with Docker Compose
+6. Get bacon by calling the self-hosted gateway - GET http://localhost:700/api/v1/bacon
+
+## Observability
+
+End-to-end correlation across component will be shown here.
+
+## Action items
+
+None at the moment.
+
+_Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
+
+## Clarification Required
+
+None at the moment.
