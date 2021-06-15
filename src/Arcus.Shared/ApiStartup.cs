@@ -8,9 +8,6 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using Serilog;
-using Serilog.Configuration;
-using Serilog.Events;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Arcus.Shared
@@ -90,21 +87,6 @@ namespace Arcus.Shared
                 swaggerUiOptions.DocumentTitle = name;
             });
             app.UseEndpoints(endpoints => endpoints.MapControllers());
-        }
-
-        protected LoggerConfiguration CreateLoggerConfiguration(string componentName, IServiceProvider serviceProvider)
-        {
-            var instrumentationKey = Configuration.GetValue<string>(ApplicationInsightsInstrumentationKeyName);
-
-            return new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .Enrich.FromLogContext()
-                .Enrich.WithVersion()
-                .Enrich.WithComponentName(componentName)
-                .Enrich.WithHttpCorrelationInfo(serviceProvider)
-                .WriteTo.Console()
-                .WriteTo.AzureApplicationInsightsOnSteroids(instrumentationKey);
         }
     }
 }

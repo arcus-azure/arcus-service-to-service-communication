@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Arcus.API.Market.Repositories.Interfaces;
 using Arcus.API.Market.Services.Interfaces;
-using Arcus.Observability.Telemetry.Core;
 using GuardNet;
 using Microsoft.Extensions.Logging;
 

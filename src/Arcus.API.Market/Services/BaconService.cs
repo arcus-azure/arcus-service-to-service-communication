@@ -31,10 +31,8 @@ namespace Arcus.API.Market.Services
         public async Task<List<string>> GetBaconAsync()
         {
             var url = _configuration["Bacon_API_Url"];
-            var apiKey = _configuration["Bacon_API_Key"];
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"http://{url}/api/v1/bacon");
-            request.Headers.Add("X-API-Key", apiKey);
 
             var response = await SendHttpRequestAsync(request);
             if (response.IsSuccessStatusCode == false)

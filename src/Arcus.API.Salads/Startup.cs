@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
 namespace Arcus.API.Salads
 {
@@ -39,7 +38,6 @@ namespace Arcus.API.Salads
             });
 
             services.AddHealthChecks();
-            services.AddHttpCorrelationFromPoc();
             
             services.AddScoped<ISaladRepository, SaladRepository>();
 
@@ -49,14 +47,9 @@ namespace Arcus.API.Salads
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseExceptionHandling();
-            app.UseHttpCorrelationFromPoc();
             app.UseRouting();
-            app.UseRequestTracking();
             
             ExposeOpenApiDocs(ApiName, app);
-
-            Log.Logger = CreateLoggerConfiguration(ComponentName, app.ApplicationServices).CreateLogger();
         }
     }
 }

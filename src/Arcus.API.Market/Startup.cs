@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
 namespace Arcus.API.Market
 {
@@ -41,7 +40,6 @@ namespace Arcus.API.Market
             });
 
             services.AddHealthChecks();
-            services.AddHttpCorrelationFromPoc();
 
             services.AddHttpClient();
             services.AddScoped<IBaconService, BaconService>();
@@ -53,14 +51,9 @@ namespace Arcus.API.Market
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseExceptionHandling();
-            app.UseHttpCorrelationFromPoc();
             app.UseRouting();
-            app.UseRequestTracking();
             
             ExposeOpenApiDocs(ApiName, app);
-
-            Log.Logger = CreateLoggerConfiguration(ComponentName, app.ApplicationServices).CreateLogger();
         }
     }
 }

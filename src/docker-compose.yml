@@ -19,6 +19,3 @@ services:
     build:
       context: .
       dockerfile: Arcus.API.Market/Dockerfile
-  arcus.api.gateway:
-    container_name: Arcus.API.Gateway
-    image: mcr.microsoft.com/azure-api-management/gateway:latest
