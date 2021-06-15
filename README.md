@@ -1,4 +1,4 @@
-# Arcus - API Gateway POC
+# Arcus - Service-to-Service Correlation POC
 
 POC to have end-to-end correlation stitching operations across services together in the Azure Application Insights Application Map.
 
