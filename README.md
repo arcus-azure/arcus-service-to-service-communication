@@ -66,6 +66,8 @@ When looking at the telemetry tree, it looks as following:
 
 ![](media/tree-overview.png)
 
+You can download the raw telemetry [here](raw-telemetry.csv).
+
 ## Action items
 
 None at the moment.
