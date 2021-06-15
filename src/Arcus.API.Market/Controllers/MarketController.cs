@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Arcus.API.Market.Contracts;
 using Arcus.API.Market.Repositories.Interfaces;
+using Arcus.Shared.Services.Interfaces;
 using GuardNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,18 +19,21 @@ namespace Arcus.API.Market.Controllers
     [Route("api/v1/market")]
     public class MarketController : ControllerBase
     {
-        private readonly IMarketRepository _marketRepository;
+        private readonly IOrderRepository _orderRepository;
         private readonly ILogger<MarketController> _logger;
+        private readonly IBaconService _baconService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MarketController"/> class.
         /// </summary>
-        public MarketController(IMarketRepository marketRepository, ILogger<MarketController> logger)
+        public MarketController(IOrderRepository orderRepository, IBaconService baconService, ILogger<MarketController> logger)
         {
-            Guard.NotNull(marketRepository, nameof(marketRepository));
+            Guard.NotNull(orderRepository, nameof(orderRepository));
+            Guard.NotNull(baconService, nameof(baconService));
             Guard.NotNull(logger, nameof(logger));
 
-            _marketRepository = marketRepository;
+            _orderRepository = orderRepository;
+            _baconService = baconService;
             _logger = logger;
         }
 
@@ -45,12 +50,15 @@ namespace Arcus.API.Market.Controllers
         [SwaggerResponseHeader(201, "X-Transaction-Id", "string", "The header that has the transaction ID is used to correlate multiple operation calls.")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderRequest orderRequest)
         {
-            var saladFlavors = await _marketRepository.OrderBaconAsync(orderRequest.Amount);
+            var bacon = await _baconService.GetBaconAsync();
+            _logger.LogInformation($"Mmmm, {bacon.First()} bacon sounds like some tasty bacon! Let's schedule a feast!");
+
+            await _orderRepository.OrderBaconAsync(orderRequest.Amount);
 
             _logger.LogEvent("Order Created");
             _logger.LogMetric("Order Created", 1);
             
-            return Ok(saladFlavors);
+            return Accepted();
         }
     }
 }

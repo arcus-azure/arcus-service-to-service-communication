@@ -7,15 +7,15 @@ services:
     build:
       context: .
       dockerfile: Arcus.API.Bacon/Dockerfile
-  arcus.apis.salads:
-    container_name: Arcus.API.Salads
-    image: arcus.apis.salads
-    build:
-      context: .
-      dockerfile: Arcus.API.Salads/Dockerfile
   arcus.apis.market:
     container_name: Arcus.API.Market
     image: arcus.apis.market
     build:
       context: .
       dockerfile: Arcus.API.Market/Dockerfile
+  arcus.workers.orders:
+    container_name: Arcus.Workers.Orders
+    image: arcus.workers.orders
+    build:
+      context: .
+      dockerfile: Arcus.Workers.Orders/Dockerfile

@@ -28,7 +28,7 @@
             API endpoint related to the market.
             </summary>
         </member>
-        <member name="M:Arcus.API.Market.Controllers.MarketController.#ctor(Arcus.API.Market.Repositories.Interfaces.IMarketRepository,Microsoft.Extensions.Logging.ILogger{Arcus.API.Market.Controllers.MarketController})">
+        <member name="M:Arcus.API.Market.Controllers.MarketController.#ctor(Arcus.API.Market.Repositories.Interfaces.IOrderRepository,Arcus.Shared.Services.Interfaces.IBaconService,Microsoft.Extensions.Logging.ILogger{Arcus.API.Market.Controllers.MarketController})">
             <summary>
             Initializes a new instance of the <see cref="T:Arcus.API.Market.Controllers.MarketController"/> class.
             </summary>

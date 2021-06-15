@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Arcus.API.Market.Services.Interfaces
+namespace Arcus.Shared.Services.Interfaces
 {
     public interface IBaconService
     {

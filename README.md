@@ -40,16 +40,27 @@ Learn more in [this example](https://docs.microsoft.com/en-us/azure/azure-monito
 
 Before you can run this, you need to:
 
-1. Provision an Azure API Management instance with a self-hosted gateway
-2. Configure the gateway in Docker Compose
-3. Create a Bacon API based on the OpenAPI spec of our local API ([url](http://localhost:789/api/docs/index.html))
-4. Make Bacon API available locally
-5. Run solution with Docker Compose
-6. Get bacon by calling the self-hosted gateway - GET http://localhost:700/api/v1/bacon
+1. Run solution with Docker Compose
+2. Get bacon by calling the API - GET http://localhost:789/api/v1/bacon
+3. Create order to eat bacon asynchronously by calling the API - POST http://localhost:787/api/v1/market
+```json
+{
+    "amount": 2
+}
+```
 
-## Observability
+## How Does it Work?
 
-End-to-end correlation across component will be shown here.
+> 💡 This is currently achieved by using the Azure Application Insights SDK.
+>    We will port this to purely `TelemetryClient` to know where we need to track what.
+
+When creating an order, the following flow occurs:
+
+![](media/how-it-works.png)
+
+Here is what the end-to-end correlation across component looks like:
+
+![](media/end-to-end-correlation.png)
 
 ## Action items
 
@@ -60,3 +71,13 @@ _Some of the action items can be easily found by searching for `TODO: Contribute
 ## Clarification Required
 
 None at the moment.
+
+## Learnings
+
+We can leverage the same capabilities through Serilog if we get inspiration from the Azure Application Insights SDK:
+
+- How they pass the request information ([code](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/HttpContextExtension.cs#L16))
+- [`OperationCorrelationTelemetryInitializer`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/OperationCorrelationTelemetryInitializer.cs)
+- [`RequestTrackingTelemetryModule`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/RequestTrackingTelemetryModule.cs)
+- [`OperationNameTelemetryInitializer`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/OperationNameTelemetryInitializer.cs)
+- [`AuthenticatedUserIdTelemetryInitializer`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/AuthenticatedUserIdTelemetryInitializer.cs)

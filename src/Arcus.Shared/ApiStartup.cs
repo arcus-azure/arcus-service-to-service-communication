@@ -14,8 +14,6 @@ namespace Arcus.Shared
 {
     public class ApiStartup
     {
-        private const string ApplicationInsightsInstrumentationKeyName = "ApplicationInsights_InstrumentationKey";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiStartup"/> class.
         /// </summary>

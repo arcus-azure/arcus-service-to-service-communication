@@ -4,22 +4,22 @@ services:
   arcus.apis.bacon:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ApplicationInsights_InstrumentationKey=<key>
+      - APPINSIGHTS_INSTRUMENTATIONKEY=<key>
       - ARCUS_HTTP_PORT=999
     ports:
       - "789:999"
   arcus.apis.market:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ApplicationInsights_InstrumentationKey=<key>
+      - APPINSIGHTS_INSTRUMENTATIONKEY=<key>
       - ARCUS_HTTP_PORT=888
+      - SERVICEBUS_CONNECTIONSTRING=<key>
       - Bacon_API_Url=Arcus.API.Bacon:999
     ports:
       - "787:888"
-  arcus.apis.salads:
+  arcus.workers.orders:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ApplicationInsights_InstrumentationKey=<key>
-      - ARCUS_HTTP_PORT=777
-    ports:
-      - "788:777"
+      - APPINSIGHTS_INSTRUMENTATIONKEY=<key>
+      - SERVICEBUS_CONNECTIONSTRING=<key>
+      - Bacon_API_Url=Arcus.API.Bacon:999

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Arcus.API.Market.Repositories.Interfaces
+namespace Arcus.Workers.Orders.Repositories.Interfaces
 {
     public interface IMarketRepository
     {
