@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Arcus.API.Market.Repositories.Interfaces;
-using Arcus.API.Market.Services.Interfaces;
+using Arcus.Shared.Services.Interfaces;
+using Arcus.Workers.Orders.Repositories.Interfaces;
 using GuardNet;
 using Microsoft.Extensions.Logging;
 
-namespace Arcus.API.Market.Repositories
+namespace Arcus.Workers.Orders.Repositories
 {
     public class MarketRepository : IMarketRepository
     {

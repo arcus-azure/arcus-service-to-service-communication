@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Arcus.API.Bacon.Repositories.Interfaces;
 using GuardNet;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -18,16 +19,19 @@ namespace Arcus.API.Bacon.Controllers
     {
         private readonly IBaconRepository _baconRepository;
         private readonly ILogger<BaconController> _logger;
+        private readonly TelemetryClient _telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaconController"/> class.
         /// </summary>
-        public BaconController(IBaconRepository baconRepository, ILogger<BaconController> logger)
+        public BaconController(IBaconRepository baconRepository, TelemetryClient telemetryClient, ILogger<BaconController> logger)
         {
             Guard.NotNull(baconRepository, nameof(baconRepository));
+            Guard.NotNull(telemetryClient, nameof(telemetryClient));
             Guard.NotNull(logger, nameof(logger));
 
             _baconRepository = baconRepository;
+            _telemetryClient = telemetryClient;
             _logger = logger;
         }
 
@@ -46,8 +50,8 @@ namespace Arcus.API.Bacon.Controllers
         {
             var baconFlavors = await _baconRepository.GetFlavorsAsync();
 
-            _logger.LogEvent("Bacon Served");
-            _logger.LogMetric("Bacon Served", 1);
+            _telemetryClient.TrackEvent("Bacon Served");
+            _telemetryClient.TrackMetric("Bacon Served", 1);
             
             return Ok(baconFlavors);
         }
