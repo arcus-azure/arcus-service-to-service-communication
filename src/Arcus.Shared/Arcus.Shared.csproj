@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Arcus.Observability.Telemetry.AspNetCore" Version="2.0.0" />
+    <PackageReference Include="Arcus.Observability.Telemetry.Core" Version="2.0.0" />
+    <PackageReference Include="Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights" Version="2.0.0" />
+    <PackageReference Include="Arcus.WebApi.Logging" Version="1.1.0" />
+    <PackageReference Include="Bogus" Version="33.0.2" />
+    <PackageReference Include="Guard.NET" Version="1.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.7" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="6.1.0" />
+  </ItemGroup>
+
+</Project>

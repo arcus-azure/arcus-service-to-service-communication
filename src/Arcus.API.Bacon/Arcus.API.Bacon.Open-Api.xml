@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Arcus.API.Bacon</name>
+    </assembly>
+    <members>
+        <member name="T:Arcus.API.Bacon.Controllers.BaconController">
+            <summary>
+            API endpoint to get bacon.
+            </summary>
+        </member>
+        <member name="M:Arcus.API.Bacon.Controllers.BaconController.#ctor(Arcus.API.Bacon.Repositories.Interfaces.IBaconRepository,Microsoft.Extensions.Logging.ILogger{Arcus.API.Bacon.Controllers.BaconController})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Arcus.API.Bacon.Controllers.BaconController"/> class.
+            </summary>
+        </member>
+        <member name="M:Arcus.API.Bacon.Controllers.BaconController.Get">
+            <summary>
+                Get Bacon
+            </summary>
+            <remarks>Provides an overview of various bacon flavors.</remarks>
+            <response code="200">Bacon is served!</response>
+            <response code="503">Uh-oh! Things went wrong</response>
+        </member>
+        <member name="T:Arcus.API.Bacon.Controllers.HealthController">
+            <summary>
+            API endpoint to check the health of the application.
+            </summary>
+        </member>
+        <member name="M:Arcus.API.Bacon.Controllers.HealthController.#ctor(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Arcus.API.Bacon.Controllers.HealthController"/> class.
+            </summary>
+            <param name="healthCheckService">The service to provide the health of the API application.</param>
+        </member>
+        <member name="M:Arcus.API.Bacon.Controllers.HealthController.Get">
+            <summary>
+                Get Health
+            </summary>
+            <remarks>Provides an indication about the health of the API.</remarks>
+            <response code="200">API is healthy</response>
+            <response code="503">API is unhealthy or in degraded state</response>
+        </member>
+    </members>
+</doc>

@@ -330,3 +330,4 @@ ASALocalRun/
 .mfractor/
 
 docs/_site
+src/docker-compose.vs.debug.yml

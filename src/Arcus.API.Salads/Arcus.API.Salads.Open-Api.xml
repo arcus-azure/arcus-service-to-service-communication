@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Arcus.API.Salads</name>
+    </assembly>
+    <members>
+        <member name="T:Arcus.API.Salads.Controllers.HealthController">
+            <summary>
+            API endpoint to check the health of the application.
+            </summary>
+        </member>
+        <member name="M:Arcus.API.Salads.Controllers.HealthController.#ctor(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Arcus.API.Salads.Controllers.HealthController"/> class.
+            </summary>
+            <param name="healthCheckService">The service to provide the health of the API application.</param>
+        </member>
+        <member name="M:Arcus.API.Salads.Controllers.HealthController.Get">
+            <summary>
+                Get Health
+            </summary>
+            <remarks>Provides an indication about the health of the API.</remarks>
+            <response code="200">API is healthy</response>
+            <response code="503">API is unhealthy or in degraded state</response>
+        </member>
+        <member name="T:Arcus.API.Salads.Controllers.SaladsController">
+            <summary>
+            API endpoint to get salads.
+            </summary>
+        </member>
+        <member name="M:Arcus.API.Salads.Controllers.SaladsController.#ctor(Arcus.API.Salads.Repositories.Interfaces.ISaladRepository,Microsoft.Extensions.Logging.ILogger{Arcus.API.Salads.Controllers.SaladsController})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Arcus.API.Salads.Controllers.SaladsController"/> class.
+            </summary>
+        </member>
+        <member name="M:Arcus.API.Salads.Controllers.SaladsController.Get">
+            <summary>
+                Get Salad
+            </summary>
+            <remarks>Provides an overview of salad dishes.</remarks>
+            <response code="200">Salad is served!</response>
+            <response code="503">Uh-oh! Things went wrong</response>
+        </member>
+    </members>
+</doc>
