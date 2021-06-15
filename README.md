@@ -62,6 +62,10 @@ Here is what the end-to-end correlation across component looks like:
 
 ![](media/end-to-end-correlation.png)
 
+When looking at the telemetry tree, it looks as following:
+
+![](media/tree-overview.png)
+
 ## Action items
 
 None at the moment.
