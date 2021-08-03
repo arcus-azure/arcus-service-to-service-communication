@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <PackageId>Arcus.Messaging.Pumps.ServiceBus</PackageId>
+    <Authors>Arcus</Authors>
+    <Company>Arcus</Company>
+    <Product>Arcus.Messaging</Product>
+    <Description>Provides capability to run an Azure Service Bus message pump</Description>
+    <Copyright>Copyright (c) Arcus</Copyright>
+    <PackageLicenseUrl>https://github.com/arcus-azure/arcus.messaging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/arcus-azure/arcus.messaging</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/arcus-azure/arcus/master/media/arcus.png</PackageIconUrl>
+    <RepositoryUrl>&gt;https://github.com/arcus-azure/arcus.messaging</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>Azure;Messaging;ServiceBus</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Arcus.Security.Providers.AzureKeyVault" Version="1.3.0" />
+    <PackageReference Include="Guard.NET" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.4" />
+    <PackageReference Include="Microsoft.Azure.Management.ServiceBus" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Arcus.POC.Messaging.Abstractions\Arcus.POC.Messaging.Abstractions.csproj" />
+    <ProjectReference Include="..\Arcus.POC.Messaging.Pumps.Abstractions\Arcus.POC.Messaging.Pumps.Abstractions.csproj" />
+    <ProjectReference Include="..\Arcus.POC.Messaging.ServiceBus.Core\Arcus.POC.Messaging.ServiceBus.Core.csproj" />
+  </ItemGroup>
+
+</Project>

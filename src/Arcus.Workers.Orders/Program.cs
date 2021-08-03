@@ -1,5 +1,5 @@
 ﻿using System;
-using Arcus.Messaging.Abstractions;
+using Arcus.POC.Messaging.Abstractions;
 using Arcus.Shared;
 using Arcus.Shared.Messages;
 using Arcus.Workers.Orders.MessageHandlers;
@@ -39,7 +39,6 @@ namespace Arcus.Workers.Orders
                        .ConfigureServices((hostContext, services) =>
                        {
                            // TODO: Fix the correlation retrieval in Bacon service
-                           services.AddCorrelation<MessageCorrelationInfo>();
                            services.AddBaconApiIntegration();
 
                            // TODO: Import Arcus Messaging to add request tracking

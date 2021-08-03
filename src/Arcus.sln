@@ -21,6 +21,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arcus.POC.WebApi.Logging", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arcus.POC.WebApi.Logging.Core", "Arcus.POC.WebApi.Logging.Core\Arcus.POC.WebApi.Logging.Core.csproj", "{10FB6A5D-7771-4DCB-8DF6-75E339408A1E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arcus.POC.Messaging.Abstractions", "Arcus.POC.Messaging.Abstractions\Arcus.POC.Messaging.Abstractions.csproj", "{FDF406D5-C77B-471B-BE83-B38016C0E11D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arcus.POC.Messaging.Pumps.Abstractions", "Arcus.POC.Messaging.Pumps.Abstractions\Arcus.POC.Messaging.Pumps.Abstractions.csproj", "{1B01AD79-71ED-4E67-AC46-7AA9C982BF2C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arcus.POC.Messaging.Pumps.ServiceBus", "Arcus.POC.Messaging.Pumps.ServiceBus\Arcus.POC.Messaging.Pumps.ServiceBus.csproj", "{59F368A9-A211-43B8-9D30-3213588A835F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arcus.POC.Messaging.ServiceBus.Core", "Arcus.POC.Messaging.ServiceBus.Core\Arcus.POC.Messaging.ServiceBus.Core.csproj", "{141D28AD-8B17-4895-93BE-9398B05E8B21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +67,22 @@ Global
 		{10FB6A5D-7771-4DCB-8DF6-75E339408A1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10FB6A5D-7771-4DCB-8DF6-75E339408A1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10FB6A5D-7771-4DCB-8DF6-75E339408A1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDF406D5-C77B-471B-BE83-B38016C0E11D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDF406D5-C77B-471B-BE83-B38016C0E11D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDF406D5-C77B-471B-BE83-B38016C0E11D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDF406D5-C77B-471B-BE83-B38016C0E11D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B01AD79-71ED-4E67-AC46-7AA9C982BF2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B01AD79-71ED-4E67-AC46-7AA9C982BF2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B01AD79-71ED-4E67-AC46-7AA9C982BF2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B01AD79-71ED-4E67-AC46-7AA9C982BF2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59F368A9-A211-43B8-9D30-3213588A835F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59F368A9-A211-43B8-9D30-3213588A835F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59F368A9-A211-43B8-9D30-3213588A835F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59F368A9-A211-43B8-9D30-3213588A835F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{141D28AD-8B17-4895-93BE-9398B05E8B21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{141D28AD-8B17-4895-93BE-9398B05E8B21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{141D28AD-8B17-4895-93BE-9398B05E8B21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{141D28AD-8B17-4895-93BE-9398B05E8B21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +91,10 @@ Global
 		{8E44AE96-59CE-4C2E-B043-988D3407822E} = {5BD7F203-46E7-47D8-9F43-B699AD7F5D37}
 		{24B79ABB-9803-4D9C-AA68-4A96DD23C7D8} = {5BD7F203-46E7-47D8-9F43-B699AD7F5D37}
 		{10FB6A5D-7771-4DCB-8DF6-75E339408A1E} = {5BD7F203-46E7-47D8-9F43-B699AD7F5D37}
+		{FDF406D5-C77B-471B-BE83-B38016C0E11D} = {5BD7F203-46E7-47D8-9F43-B699AD7F5D37}
+		{1B01AD79-71ED-4E67-AC46-7AA9C982BF2C} = {5BD7F203-46E7-47D8-9F43-B699AD7F5D37}
+		{59F368A9-A211-43B8-9D30-3213588A835F} = {5BD7F203-46E7-47D8-9F43-B699AD7F5D37}
+		{141D28AD-8B17-4895-93BE-9398B05E8B21} = {5BD7F203-46E7-47D8-9F43-B699AD7F5D37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F3A404DC-AF91-4499-B313-A2EE43A6175B}

@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Arcus.Messaging.ServiceBus.Core" Version="0.6.0" />
     <PackageReference Include="Arcus.Observability.Telemetry.Serilog.Enrichers" Version="2.2.1" />
     <PackageReference Include="Bogus" Version="33.0.2" />
     <PackageReference Include="Guard.NET" Version="1.2.0" />
@@ -19,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Arcus.POC.Messaging.Abstractions\Arcus.POC.Messaging.Abstractions.csproj" />
+    <ProjectReference Include="..\Arcus.POC.Messaging.Pumps.Abstractions\Arcus.POC.Messaging.Pumps.Abstractions.csproj" />
+    <ProjectReference Include="..\Arcus.POC.Messaging.Pumps.ServiceBus\Arcus.POC.Messaging.Pumps.ServiceBus.csproj" />
+    <ProjectReference Include="..\Arcus.POC.Messaging.ServiceBus.Core\Arcus.POC.Messaging.ServiceBus.Core.csproj" />
     <ProjectReference Include="..\Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights\Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.csproj" />
     <ProjectReference Include="..\Arcus.POC.WebApi.Logging\Arcus.POC.WebApi.Logging.csproj" />
   </ItemGroup>
