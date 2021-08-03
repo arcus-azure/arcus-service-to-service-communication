@@ -16,7 +16,7 @@ namespace Arcus.Shared
         {
             var instrumentationKey = configuration.GetValue<string>(ApplicationInsightsInstrumentationKeyName);
 
-            loggerConfiguration = loggerConfiguration.MinimumLevel.Debug()
+            loggerConfiguration = loggerConfiguration.MinimumLevel.Verbose()
                                                     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                                                     .Enrich.FromLogContext()
                                                     .Enrich.WithVersion()
@@ -25,6 +25,10 @@ namespace Arcus.Shared
             if (useHttpCorrelation)
             {
                 loggerConfiguration = loggerConfiguration.Enrich.WithCustomHttpCorrelationInfo(serviceProvider);
+            }
+            else
+            {
+                loggerConfiguration = loggerConfiguration.Enrich.WithCorrelationInfo(serviceProvider);
             }
 
             loggerConfiguration = loggerConfiguration.WriteTo.Console()

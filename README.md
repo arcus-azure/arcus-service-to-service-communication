@@ -12,6 +12,13 @@ Depending on progress, we will include a message broker in the middle to see if 
 
 This POC will fully rely on Azure Application Insight's `TelemetryClient` to easily set it up correctly and see how we can port this to Arcus Observability & Serilog.
 
+### Requirements
+
+- Correlate across services in the Azure Application Insights Application Map
+    - Support for HTTP dependencies
+    - Support for Service Bus dependencies
+- Correlate multiple interactions in the same operation & component, in a tree-manner
+
 ### Official Telemetry Correlation Guidance
 
 As per [the guidance](https://docs.microsoft.com/en-us/azure/azure-monitor/app/correlation#data-model-for-telemetry-correlation):
@@ -77,6 +84,7 @@ You can download the raw telemetry [here](raw-telemetry.csv).
 
 - [ ] Support operation (parent) IDs with `:`
 - [ ] Provide a convenient way to do this automatically when using `HttpClient`
+- [ ] Provide support for upstream operation IDs with Arcus Messaging
 
 _Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
 

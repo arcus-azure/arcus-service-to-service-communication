@@ -59,7 +59,7 @@ namespace Arcus.Shared.Services
                 // TODO: Verify
                 var newDependencyId = Guid.NewGuid().ToString();
                 var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
-                var upstreamOperationParentId = $"|{correlationInfo.OperationId}.{newDependencyId}";
+                var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
                 request.Headers.Add("Request-Id", upstreamOperationParentId);
                 request.Headers.Add("X-Transaction-ID", correlationInfo?.TransactionId);
 

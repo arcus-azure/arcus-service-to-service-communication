@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 using Arcus.API.Market.Repositories.Interfaces;
+using Arcus.Observability.Correlation;
 using Arcus.Observability.Telemetry.Core;
 using Arcus.Shared.Messages;
 using GuardNet;
@@ -12,14 +13,17 @@ namespace Arcus.API.Market.Repositories
 {
     public class OrderRepository : IOrderRepository
     {
+        private readonly ICorrelationInfoAccessor _correlationInfoAccessor;
         private readonly ILogger<OrderRepository> _logger;
         private readonly QueueClient _queueClient;
 
-        public OrderRepository(QueueClient queueClient, ILogger<OrderRepository> logger)
+        public OrderRepository(QueueClient queueClient, ICorrelationInfoAccessor correlationInfoAccessor, ILogger<OrderRepository> logger)
         {
+            Guard.NotNull(correlationInfoAccessor, nameof(correlationInfoAccessor));
             Guard.NotNull(queueClient, nameof(queueClient));
             Guard.NotNull(logger, nameof(logger));
 
+            _correlationInfoAccessor = correlationInfoAccessor;
             _queueClient = queueClient;
             _logger = logger;
         }
@@ -36,18 +40,18 @@ namespace Arcus.API.Market.Repositories
                 bool isSuccessful = false;
                 try
                 {
-                    var rawMessagePayload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(orderRequest));
-                    var serviceBusMessage = new Message(rawMessagePayload);
+                    var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
+                    var serviceBusMessage = orderRequest.AsServiceBusMessage(operationId: correlationInfo?.OperationId, transactionId: correlationInfo?.TransactionId);
+                    
                     await _queueClient.SendAsync(serviceBusMessage);
 
                     isSuccessful = true;
                 }
                 finally
                 {
-                    // TODO: Uncomment
-                    //_logger.LogServiceBusQueueDependency(_queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement);
-                }
-                
+                    // TODO: Support linking as well
+                    _logger.LogServiceBusQueueDependency(_queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement);
+                }                
             }
         }
     }
