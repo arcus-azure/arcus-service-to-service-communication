@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Arcus.Observability.Correlation;
 using Arcus.Observability.Telemetry.Core;
+using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using Arcus.Shared.Services.Interfaces;
 using GuardNet;
 using Microsoft.Extensions.Configuration;
@@ -56,8 +57,10 @@ namespace Arcus.Shared.Services
             using(var httpDependencyMeasurement = DependencyMeasurement.Start(operationName))
             {
                 // TODO: Verify
+                var newDependencyId = Guid.NewGuid().ToString();
                 var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
-                request.Headers.Add("Request-Id", $"|{correlationInfo?.OperationId}");
+                var upstreamOperationParentId = $"|{correlationInfo.OperationId}.{newDependencyId}";
+                request.Headers.Add("Request-Id", upstreamOperationParentId);
                 request.Headers.Add("X-Transaction-ID", correlationInfo?.TransactionId);
 
                 // TODO: Check HTTP pipeline for hooks
@@ -65,7 +68,7 @@ namespace Arcus.Shared.Services
                 var response = await httpClient.SendAsync(request);
                 
                 _logger.LogInformation("Calling bacon API completed with status:" + response.StatusCode);
-                _logger.LogHttpDependency(request, response.StatusCode, httpDependencyMeasurement);
+                _logger.LogExtendedHttpDependency(request, response.StatusCode, httpDependencyMeasurement, dependencyId: upstreamOperationParentId);
 
                 return response;
             }

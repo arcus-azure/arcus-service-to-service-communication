@@ -49,7 +49,7 @@ Before you can run this, you need to:
 }
 ```
 
-## How Does it Work?
+## How Does it Work with Azure Application Insights SDK?
 
 > 💡 This is currently achieved by using the Azure Application Insights SDK.
 >    We will port this to purely `TelemetryClient` to know where we need to track what.
@@ -68,9 +68,15 @@ When looking at the telemetry tree, it looks as following:
 
 You can download the raw telemetry [here](raw-telemetry.csv).
 
+### Learnings
+
+- The `operationId` is identical in every component, so we have to propogate it to correlate across components.
+- The `id` of the dependency in the initial component must match the `operationParentId` of the request in the second component.
+
 ## Action items
 
 - [ ] Support operation (parent) IDs with `:`
+- [ ] Provide a convenient way to do this automatically when using `HttpClient`
 
 _Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
 

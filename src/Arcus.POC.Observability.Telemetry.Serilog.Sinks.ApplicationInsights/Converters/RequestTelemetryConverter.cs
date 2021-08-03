@@ -33,7 +33,8 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             DateTimeOffset requestTime = logEntry.Properties.GetAsDateTimeOffset(nameof(RequestLogEntry.RequestTime));
             IDictionary<string, string> context = logEntry.Properties.GetAsDictionary(nameof(RequestLogEntry.Context));
 
-            string operationId = logEvent.Properties.GetAsRawString(ContextProperties.Correlation.OperationId);
+            // TODO: Generate this
+            string requestTelemetryId = Guid.NewGuid().ToString();
 
             var requestName = $"{requestMethod} {requestUri}";
             bool isSuccessfulRequest = DetermineRequestOutcome(responseStatusCode);
@@ -41,7 +42,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
 
             var requestTelemetry = new RequestTelemetry(requestName, requestTime, requestDuration, responseStatusCode, isSuccessfulRequest)
             {
-                Id = operationId,
+                Id = requestTelemetryId,
                 Url = url,
             };
 

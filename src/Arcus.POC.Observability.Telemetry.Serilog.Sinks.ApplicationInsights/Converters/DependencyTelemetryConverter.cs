@@ -35,12 +35,16 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             bool outcome = logEntry.Properties.GetAsBool(nameof(DependencyLogEntry.IsSuccessful));
             IDictionary<string, string> context = logEntry.Properties.GetAsDictionary(nameof(DependencyLogEntry.Context));
             
-            string operationId = logEvent.Properties.GetAsRawString(ContextProperties.Correlation.OperationId);
+            // TODO: Check if this works
+            string dependencyId = logEntry.Properties.GetAsRawString("DependencyId");
             
+            // TODO: Remove this as this is a fallback for older extensions
+            dependencyId = string.IsNullOrWhiteSpace(dependencyId) ? Guid.NewGuid().ToString() : dependencyId;
+
             // TODO: Assign a new id for the dependency itself and return it when calling logdependency
             var dependencyTelemetry = new DependencyTelemetry(dependencyType, target, dependencyName, data, startTime, duration, resultCode, success: outcome)
             {
-                Id = operationId
+                Id = dependencyId
             };
 
             dependencyTelemetry.Properties.AddRange(context);

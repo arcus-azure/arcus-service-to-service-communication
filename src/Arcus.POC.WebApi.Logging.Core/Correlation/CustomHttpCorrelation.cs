@@ -25,6 +25,7 @@ namespace Arcus.WebApi.Logging.Correlation
         private readonly ICorrelationInfoAccessor _correlationInfoAccessor;
         private readonly ILogger<CustomHttpCorrelation> _logger;
 
+        // TODO: Contribute Upstream: Regex to support having ":" in the IDs
         private static readonly Regex RequestIdRegex = 
             new Regex(@"^(\|)?([a-zA-Z0-9\:\-]+(\.[a-zA-Z0-9\:\-]+)?)+(_|\.)?$", RegexOptions.Compiled, matchTimeout: TimeSpan.FromSeconds(1));
 
@@ -206,14 +207,19 @@ namespace Arcus.WebApi.Logging.Correlation
 
         private bool TryGetUpstreamOperationId(HttpContext context, out string operationParentId)
         {
-            if (context.Request.Headers.TryGetValue(_options.UpstreamService.OperationParentIdHeaderName, out StringValues requestId) 
+            if (context.Request.Headers.TryGetValue(_options.UpstreamService.OperationParentIdHeaderName,
+                    out StringValues requestId)
                 && !String.IsNullOrWhiteSpace(requestId)
-                && requestId.Count > 0
-                && MatchesRequestIdFormat(requestId))
+                && requestId.Count > 0)
             {
-                _logger.LogTrace("Found operation parent ID '{OperationParentId}' from upstream service in request's header '{HeaderName}'", requestId, _options.UpstreamService.OperationParentIdHeaderName);
-                operationParentId = requestId;
-                return true;
+                if (MatchesRequestIdFormat(requestId))
+                {
+                    _logger.LogTrace(
+                        "Found operation parent ID '{OperationParentId}' from upstream service in request's header '{HeaderName}'",
+                        requestId, _options.UpstreamService.OperationParentIdHeaderName);
+                    operationParentId = requestId;
+                    return true;
+                }
             }
 
             _logger.LogTrace("No operation parent ID found from upstream service in the request's header '{HeaderName}' that matches the expected format: |Guid.", _options.UpstreamService.OperationParentIdHeaderName);
