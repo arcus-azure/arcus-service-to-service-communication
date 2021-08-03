@@ -11,7 +11,7 @@ namespace Arcus.API.Market
 {
     public class Startup : ApiStartup
     {
-        private const string ComponentName = "Market API";
+        public const string ComponentName = "Market API";
         private string ApiName => $"Arcus - {ComponentName}";
         
         public Startup(IConfiguration configuration)
@@ -23,8 +23,6 @@ namespace Arcus.API.Market
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApplicationInsights(ComponentName);
-
             services.AddRouting(options =>
             {
                 options.LowercaseUrls = true;
@@ -37,10 +35,10 @@ namespace Arcus.API.Market
 
                 RestrictToJsonContentType(options);
                 ConfigureJsonFormatters(options);
-
             });
 
             services.AddHealthChecks();
+            services.AddCustomHttpCorrelation(options => options.UpstreamService.ExtractFromRequest = true);
 
             services.AddBaconApiIntegration();
             services.AddScoped<QueueClient>(serviceProvider =>
@@ -56,8 +54,11 @@ namespace Arcus.API.Market
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCustomExceptionHandling();
+            app.UseCustomHttpCorrelation();
             app.UseRouting();
-            
+            app.UseCustomRequestTracking();
+
             ExposeOpenApiDocs(ApiName, app);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Arcus.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -68,15 +69,20 @@ namespace Arcus.API.Bacon
                         //#error Please provide a valid secret provider, for example Azure Key Vault: https://security.arcus-azure.net/features/secrets/consume-from-key-vault
                         stores.AddAzureKeyVaultWithManagedServiceIdentity("https://your-keyvault.vault.azure.net/");
                     })
+                    .UseSerilog(DefineLoggerConfiguration)
                     .ConfigureWebHostDefaults(webBuilder =>
                     {
                         webBuilder.ConfigureKestrel(kestrelServerOptions => kestrelServerOptions.AddServerHeader = false)
                                   .UseUrls(httpEndpointUrl)
-                                  .UseSerilog()
                                   .UseStartup<Startup>();
                     });
 
             return webHostBuilder;
+        }
+
+        private static void DefineLoggerConfiguration(HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration)
+        {
+            SerilogFactory.ConfigureSerilog(Startup.ComponentName, loggerConfiguration, context.Configuration, services);
         }
     }
 }

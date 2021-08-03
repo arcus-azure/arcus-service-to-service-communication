@@ -9,7 +9,7 @@
             API endpoint to get bacon.
             </summary>
         </member>
-        <member name="M:Arcus.API.Bacon.Controllers.BaconController.#ctor(Arcus.API.Bacon.Repositories.Interfaces.IBaconRepository,Microsoft.ApplicationInsights.TelemetryClient,Microsoft.Extensions.Logging.ILogger{Arcus.API.Bacon.Controllers.BaconController})">
+        <member name="M:Arcus.API.Bacon.Controllers.BaconController.#ctor(Arcus.API.Bacon.Repositories.Interfaces.IBaconRepository,Microsoft.Extensions.Logging.ILogger{Arcus.API.Bacon.Controllers.BaconController})">
             <summary>
             Initializes a new instance of the <see cref="T:Arcus.API.Bacon.Controllers.BaconController"/> class.
             </summary>

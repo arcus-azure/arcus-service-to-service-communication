@@ -10,7 +10,7 @@ namespace Arcus.API.Bacon
 {
     public class Startup : ApiStartup
     {
-        private const string ComponentName = "Bacon API";
+        public const string ComponentName = "Bacon API";
         private string ApiName => $"Arcus - {ComponentName}";
 
         public Startup(IConfiguration configuration)
@@ -22,7 +22,6 @@ namespace Arcus.API.Bacon
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApplicationInsights(ComponentName);
             services.AddRouting(options =>
             {
                 options.LowercaseUrls = true;
@@ -37,9 +36,10 @@ namespace Arcus.API.Bacon
                 ConfigureJsonFormatters(options);
 
             });
-
-            services.AddHealthChecks();
             
+            services.AddHealthChecks();
+            services.AddCustomHttpCorrelation(options => options.UpstreamService.ExtractFromRequest = true);
+
             services.AddScoped<IBaconRepository, BaconRepository>();
 
             ConfigureOpenApiGeneration(ApiName, "Arcus.API.Bacon.Open-Api.xml", services);
@@ -48,8 +48,11 @@ namespace Arcus.API.Bacon
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCustomExceptionHandling();
+            app.UseCustomHttpCorrelation();
             app.UseRouting();
-            
+            app.UseCustomRequestTracking();
+
             ExposeOpenApiDocs(ApiName, app);
         }
     }

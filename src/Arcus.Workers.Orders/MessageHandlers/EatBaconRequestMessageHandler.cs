@@ -30,8 +30,9 @@ namespace Arcus.Workers.Orders.MessageHandlers
 
             for(int amountOfBaconEaten = 1; amountOfBaconEaten <= message.Amount;amountOfBaconEaten++)
             {
-                var bacon = await _baconService.GetBaconAsync();
-                _logger.LogInformation("I have just tasted {Bacon} bacon!", bacon.First());
+                // TODO: Uncomment
+                //var bacon = await _baconService.GetBaconAsync();
+                //_logger.LogInformation("I have just tasted {Bacon} bacon!", bacon.First());
             }
 
             _logger.LogInformation("Message {message} processed!", message);

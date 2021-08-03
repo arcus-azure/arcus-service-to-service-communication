@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 using Arcus.API.Market.Repositories.Interfaces;
+using Arcus.Observability.Telemetry.Core;
 using Arcus.Shared.Messages;
 using GuardNet;
 using Microsoft.Azure.ServiceBus;
@@ -25,11 +26,29 @@ namespace Arcus.API.Market.Repositories
 
         public async Task OrderBaconAsync(int amount)
         {
-            var orderRequest = new EatBaconRequestMessage()
+            var orderRequest = new EatBaconRequestMessage
             {
                 Amount = amount
             };
-            await _queueClient.SendAsync(new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(orderRequest))));
+
+            using (var serviceBusDependencyMeasurement = DependencyMeasurement.Start("Order Bacon"))
+            {
+                bool isSuccessful = false;
+                try
+                {
+                    var rawMessagePayload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(orderRequest));
+                    var serviceBusMessage = new Message(rawMessagePayload);
+                    await _queueClient.SendAsync(serviceBusMessage);
+
+                    isSuccessful = true;
+                }
+                finally
+                {
+                    // TODO: Uncomment
+                    //_logger.LogServiceBusQueueDependency(_queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement);
+                }
+                
+            }
         }
     }
 }

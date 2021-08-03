@@ -1,10 +1,11 @@
-﻿using Arcus.Shared.ApplicationInsights;
+﻿using System;
+using Arcus.Shared;
 using Arcus.Shared.Messages;
 using Arcus.Workers.Orders.MessageHandlers;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace Arcus.Workers.Orders
 {
@@ -33,15 +34,18 @@ namespace Arcus.Workers.Orders
                        {
                            stores.AddEnvironmentVariables();
                        })
+                       .UseSerilog(DefineLoggerConfiguration)
                        .ConfigureServices((hostContext, services) =>
                        {
                            services.AddBaconApiIntegration();
-                           services.AddApplicationInsightsTelemetryWorkerService();
-                           services.AddSingleton<ITelemetryInitializer, CloudRoleNameTelemetryInitializer>(serviceProvider => CloudRoleNameTelemetryInitializer.CreateForComponent(ComponentName));
-
                            services.AddServiceBusQueueMessagePump("orders", secretProvider => secretProvider.GetRawSecretAsync("SERVICEBUS_CONNECTIONSTRING"))
                                    .WithServiceBusMessageHandler<EatBaconRequestMessageHandler, EatBaconRequestMessage>();
                        });
+        }
+
+        private static void DefineLoggerConfiguration(HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration)
+        {
+            SerilogFactory.ConfigureSerilog(ComponentName, loggerConfiguration, context.Configuration, services, useHttpCorrelation: false);
         }
     }
 }
