@@ -1,8 +1,10 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using Arcus.API.Market.Repositories.Interfaces;
 using Arcus.Observability.Correlation;
 using Arcus.Observability.Telemetry.Core;
+using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using Arcus.Shared.Messages;
 using GuardNet;
 using Microsoft.Azure.ServiceBus;
@@ -38,10 +40,13 @@ namespace Arcus.API.Market.Repositories
             using (var serviceBusDependencyMeasurement = DependencyMeasurement.Start("Order Bacon"))
             {
                 bool isSuccessful = false;
+                var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
+                var newDependencyId = Guid.NewGuid().ToString();
+                var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
+
                 try
                 {
-                    var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
-                    var serviceBusMessage = orderRequest.AsServiceBusMessage(operationId: correlationInfo?.OperationId, transactionId: correlationInfo?.TransactionId);
+                    var serviceBusMessage = orderRequest.AsServiceBusMessage(operationId: correlationInfo?.OperationId, transactionId: correlationInfo?.TransactionId, operationParentId: upstreamOperationParentId);
                     
                     await _queueClient.SendAsync(serviceBusMessage);
 
@@ -50,7 +55,7 @@ namespace Arcus.API.Market.Repositories
                 finally
                 {
                     // TODO: Support linking as well
-                    _logger.LogServiceBusQueueDependency(_queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement);
+                    _logger.LogExtendedServiceBusQueueDependency(_queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
                 }                
             }
         }

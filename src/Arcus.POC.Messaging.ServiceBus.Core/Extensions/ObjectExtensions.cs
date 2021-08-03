@@ -19,7 +19,7 @@ namespace Microsoft.Azure.ServiceBus
         /// <param name="transactionId">Unique identifier that spans one or more operations and are considered a transaction/session</param>
         /// <param name="encoding">Encoding to use during serialization. Defaults to UTF8</param>
         /// <returns>Azure Service Bus Message</returns>
-        public static Message AsServiceBusMessage(this object messageBody, string operationId = null, string transactionId = null, Encoding encoding = null)
+        public static Message AsServiceBusMessage(this object messageBody, string operationId = null, string transactionId = null, string operationParentId = null, Encoding encoding = null)
         {
             Guard.NotNull(messageBody, nameof(messageBody));
 
@@ -41,6 +41,11 @@ namespace Microsoft.Azure.ServiceBus
             if (string.IsNullOrWhiteSpace(transactionId) == false)
             {
                 serviceBusMessage.UserProperties.Add(PropertyNames.TransactionId, transactionId);
+            }
+
+            if (string.IsNullOrWhiteSpace(operationParentId) == false)
+            {
+                serviceBusMessage.UserProperties.Add(PropertyNames.OperationParentId, operationParentId);
             }
 
             return serviceBusMessage;

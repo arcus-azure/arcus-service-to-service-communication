@@ -55,8 +55,15 @@ namespace Microsoft.Azure.ServiceBus
 
             string transactionId = DetermineTransactionId(message, transactionIdPropertyName);
             string operationId = DetermineOperationId(message.CorrelationId);
+            
+            string operationParentId = null;
 
-            var messageCorrelationInfo = new MessageCorrelationInfo(operationId, transactionId);
+            if (message.UserProperties.TryGetValue(PropertyNames.OperationParentId, out object foundOperationParentId))
+            {
+                operationParentId = foundOperationParentId.ToString();
+            }
+
+            var messageCorrelationInfo = new MessageCorrelationInfo(operationId, operationParentId, transactionId);
             return messageCorrelationInfo;
         }
 

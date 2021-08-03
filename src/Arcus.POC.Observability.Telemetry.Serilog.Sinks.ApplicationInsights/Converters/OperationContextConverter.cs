@@ -30,6 +30,33 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             {
                 telemetryEntry.Context.Operation.ParentId = operationParentId;
             }
+
+            // TODO: Contribute Upstream
+            // This gives the operation a nice name to provide structure in the performance overview
+            if (telemetryEntry is RequestTelemetry f)
+            {
+                f.Context.Operation.Name = f.Name;
+            }
+
+            if (telemetryEntry is DependencyTelemetry d)
+            {
+                d.Context.Operation.Name = d.Name;
+            }
+
+            if (telemetryEntry is EventTelemetry e)
+            {
+                e.Context.Operation.Name = e.Name;
+            }
+
+            if (telemetryEntry is AvailabilityTelemetry a)
+            {
+                a.Context.Operation.Name = a.Name;
+            }
+
+            if (telemetryEntry is MetricTelemetry m)
+            {
+                m.Context.Operation.Name = m.Name;
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ This POC will fully rely on Azure Application Insight's `TelemetryClient` to eas
     - Support for HTTP dependencies
     - Support for Service Bus dependencies
 - Correlate multiple interactions in the same operation & component, in a tree-manner
+- Ensure the measured dependencies are comparable to the native Azure Application Insights telemetry
 
 ### Official Telemetry Correlation Guidance
 
@@ -85,6 +86,7 @@ You can download the raw telemetry [here](raw-telemetry.csv).
 - [ ] Support operation (parent) IDs with `:`
 - [ ] Provide a convenient way to do this automatically when using `HttpClient`
 - [ ] Provide support for upstream operation IDs with Arcus Messaging
+- [ ] Provide name for all dependency and request telemetry items
 
 _Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
 
