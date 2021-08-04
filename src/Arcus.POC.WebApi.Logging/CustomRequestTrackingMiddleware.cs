@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using GuardNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -241,7 +242,7 @@ namespace Arcus.POC.WebApi.Logging
                 }
 
                 Dictionary<string, object> logContext = telemetryContext.ToDictionary(kv => kv.Key, kv => (object)kv.Value);
-                _logger.LogRequest(httpContext.Request, httpContext.Response, duration, logContext);
+                _logger.LogHttpRequest(httpContext.Request, httpContext.Response, duration, logContext);
             }
             catch (Exception exception)
             {

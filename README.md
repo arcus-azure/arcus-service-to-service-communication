@@ -81,21 +81,6 @@ You can download the raw telemetry [here](raw-telemetry.csv).
 - The `operationId` is identical in every component, so we have to propogate it to correlate across components.
 - The `id` of the dependency in the initial component must match the `operationParentId` of the request in the second component.
 
-## Action items
-
-- [ ] Support operation (parent) IDs with `:`
-- [ ] Provide a convenient way to do this automatically when using `HttpClient`
-- [ ] Provide support for upstream operation IDs with Arcus Messaging
-- [ ] Provide name for all dependency and request telemetry items
-
-_Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
-
-## Clarification Required
-
-None at the moment.
-
-## Learnings
-
 We can leverage the same capabilities through Serilog if we get inspiration from the Azure Application Insights SDK:
 
 - How they pass the request information ([code](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/HttpContextExtension.cs#L16))
@@ -103,3 +88,17 @@ We can leverage the same capabilities through Serilog if we get inspiration from
 - [`RequestTrackingTelemetryModule`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/RequestTrackingTelemetryModule.cs)
 - [`OperationNameTelemetryInitializer`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/OperationNameTelemetryInitializer.cs)
 - [`AuthenticatedUserIdTelemetryInitializer`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/AuthenticatedUserIdTelemetryInitializer.cs)
+
+## Action items
+
+- [ ] Support operation (parent) IDs with `:`
+- [ ] Provide a convenient way to do this automatically when using `HttpClient`
+- [ ] Provide support for upstream operation IDs with Arcus Messaging
+- [ ] Provide name for all dependency and request telemetry items
+- [ ] Upgrade Arcus Observability dependency in Arcus Messaging to v2.x, instead of v0.x
+
+_Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
+
+## Clarification Required
+
+None at the moment.

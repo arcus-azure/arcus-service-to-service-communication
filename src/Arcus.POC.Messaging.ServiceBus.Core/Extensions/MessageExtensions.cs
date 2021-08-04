@@ -63,7 +63,7 @@ namespace Microsoft.Azure.ServiceBus
                 operationParentId = foundOperationParentId.ToString();
             }
 
-            var messageCorrelationInfo = new MessageCorrelationInfo(operationId, operationParentId, transactionId);
+            var messageCorrelationInfo = new MessageCorrelationInfo(operationId, transactionId, operationParentId);
             return messageCorrelationInfo;
         }
 

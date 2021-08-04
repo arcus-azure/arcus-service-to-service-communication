@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Arcus.Observability.Telemetry.Core;
 using Arcus.Observability.Telemetry.Core.Logging;
+using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using GuardNet;
 using Microsoft.ApplicationInsights.DataContracts;
 using Serilog.Events;
@@ -25,22 +26,24 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             Guard.NotNull(logEvent.Properties, nameof(logEvent), "Requires a Serilog event with a set of properties to create an Azure Application Insights Request telemetry instance");
             
             StructureValue logEntry = logEvent.Properties.GetAsStructureValue(ContextProperties.RequestTracking.RequestLogEntry);
-            string requestMethod = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.RequestMethod));
-            string requestHost = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.RequestHost));
-            string requestUri = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.RequestUri));
-            string responseStatusCode = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.ResponseStatusCode));
-            TimeSpan requestDuration = logEntry.Properties.GetAsTimeSpan(nameof(RequestLogEntry.RequestDuration));
-            DateTimeOffset requestTime = logEntry.Properties.GetAsDateTimeOffset(nameof(RequestLogEntry.RequestTime));
-            IDictionary<string, string> context = logEntry.Properties.GetAsDictionary(nameof(RequestLogEntry.Context));
+            string requestMethod = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.RequestMethod));
+            string requestHost = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.RequestHost));
+            string requestUri = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.RequestUri));
+            string responseStatusCode = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.ResponseStatusCode));
+            TimeSpan requestDuration = logEntry.Properties.GetAsTimeSpan(nameof(ExtendedRequestLogEntry.RequestDuration));
+            DateTimeOffset requestTime = logEntry.Properties.GetAsDateTimeOffset(nameof(ExtendedRequestLogEntry.RequestTime));
+            IDictionary<string, string> context = logEntry.Properties.GetAsDictionary(nameof(ExtendedRequestLogEntry.Context));
+            string sourceSystem = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.SourceSystem));
+            string sourceName = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.SourceName));
 
             // TODO: Generate this
             string requestTelemetryId = Guid.NewGuid().ToString();
-
-            var requestName = $"{requestMethod} {requestUri}";
+            
             bool isSuccessfulRequest = DetermineRequestOutcome(responseStatusCode);
-            var url = new Uri($"{requestHost}{requestUri}");
+            
+            var url = DetermineUrl(sourceSystem, requestHost, requestUri);
 
-            var requestTelemetry = new RequestTelemetry(requestName, requestTime, requestDuration, responseStatusCode, isSuccessfulRequest)
+            var requestTelemetry = new RequestTelemetry(sourceName, requestTime, requestDuration, responseStatusCode, isSuccessfulRequest)
             {
                 Id = requestTelemetryId,
                 Url = url,
@@ -48,6 +51,16 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
 
             requestTelemetry.Properties.AddRange(context);
             return requestTelemetry;
+        }
+
+        private static Uri DetermineUrl(string sourceSystem, string requestHost, string requestUri)
+        {
+            if (sourceSystem != "HTTP")
+            {
+                return null;
+            }
+
+            return new Uri($"{requestHost}{requestUri}");
         }
 
         private static bool DetermineRequestOutcome(string rawResponseStatusCode)

@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Arcus.Messaging.Abstractions;
 using Arcus.Observability.Correlation;
+using Arcus.Observability.Telemetry.Core;
 using Arcus.POC.Messaging.Abstractions;
 using Arcus.POC.Messaging.Pumps.Abstractions;
 using Arcus.POC.Messaging.Pumps.Abstractions.MessageHandling;
 using Arcus.POC.Messaging.Pumps.Abstractions.Telemetry;
 using Arcus.POC.Messaging.Pumps.ServiceBus.Configuration;
 using Arcus.POC.Messaging.Pumps.ServiceBus.MessageHandling;
+using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using GuardNet;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Core;
@@ -32,7 +33,7 @@ namespace Arcus.POC.Messaging.Pumps.ServiceBus
         private readonly IAzureServiceBusFallbackMessageHandler _fallbackMessageHandler;
         private readonly MessageHandlerOptions _messageHandlerOptions;
         private readonly IDisposable _loggingScope;
-        private readonly ICorrelationInfoAccessor _correlationInfoAccessor;
+        private readonly ICorrelationInfoAccessor<MessageCorrelationInfo> _correlationInfoAccessor;
         
         private bool _isHostShuttingDown;
         private MessageReceiver _messageReceiver;
@@ -59,7 +60,7 @@ namespace Arcus.POC.Messaging.Pumps.ServiceBus
             SubscriptionName = Settings.SubscriptionName;
 
             _fallbackMessageHandler = serviceProvider.GetService<IAzureServiceBusFallbackMessageHandler>();
-            _correlationInfoAccessor = serviceProvider.GetService<ICorrelationInfoAccessor>();
+            _correlationInfoAccessor = serviceProvider.GetService<ICorrelationInfoAccessor<MessageCorrelationInfo>>();
             _messageHandlerOptions = DetermineMessageHandlerOptions(Settings);
             _loggingScope = logger.BeginScope("Job: {JobId}", JobId);
         }
@@ -560,22 +561,37 @@ namespace Arcus.POC.Messaging.Pumps.ServiceBus
             MessageCorrelationInfo correlationInfo = message.GetCorrelationInfo(transactionIdPropertyName);
             using (IServiceScope serviceScope = ServiceProvider.CreateScope())
             {
-                var correlationInfoAccessor = serviceScope.ServiceProvider.GetService<ICorrelationInfoAccessor<MessageCorrelationInfo>>();
-                if (correlationInfoAccessor is null)
+                // TODO: Simplify this approach
+                bool isSuccessful = false;
+                using(var dependencyMeasurement = DependencyMeasurement.Start("Process"))
                 {
-                    Logger.LogTrace("No message correlation configured");
-                    await ProcessMessageWithFallbackAsync(message, cancellationToken, correlationInfo);
-                }
-                else
-                {
-                    // TODO: Verify why we are using the scoped approach here
-                    // This does not work for me since the scope of my dependency is different
-                    // Is this because of concurrency?
-                    //correlationInfoAccessor.SetCorrelationInfo(correlationInfo);
-                    _correlationInfoAccessor.SetCorrelationInfo(correlationInfo);
-                    using (LogContext.Push(new MessageCorrelationInfoEnricher(correlationInfoAccessor)))
+                    try
                     {
-                        await ProcessMessageWithFallbackAsync(message, cancellationToken, correlationInfo);
+                        var correlationInfoAccessor = serviceScope.ServiceProvider
+                            .GetService<ICorrelationInfoAccessor<MessageCorrelationInfo>>();
+                        if (correlationInfoAccessor is null)
+                        {
+                            Logger.LogTrace("No message correlation configured");
+                            await ProcessMessageWithFallbackAsync(message, cancellationToken, correlationInfo);
+                        }
+                        else
+                        {
+                            // TODO: Verify why we are using the scoped approach here
+                            // This does not work for me since the scope of my dependency is different
+                            // Is this because of concurrency?
+                            //correlationInfoAccessor.SetCorrelationInfo(correlationInfo);
+                            _correlationInfoAccessor.SetCorrelationInfo(correlationInfo);
+                            using (LogContext.Push(new MessageCorrelationInfoEnricher(_correlationInfoAccessor)))
+                            {
+                                await ProcessMessageWithFallbackAsync(message, cancellationToken, correlationInfo);
+                            }
+                        }
+
+                        isSuccessful = true;
+                    }
+                    finally
+                    {
+                        Logger.LogServiceBusQueueRequest(isSuccessful, dependencyMeasurement.Elapsed, dependencyMeasurement.StartTime);
                     }
                 }
             }
