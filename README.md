@@ -8,9 +8,9 @@ POC to have end-to-end correlation stitching operations across services together
 
 Provide end-to-end correlation stitching operations across services together in the Azure Application Insights Application Map.
 
-Depending on progress, we will include a message broker in the middle to see if we can plot it correctly on the Application Map as well.
+When creating an order, the following flow occurs:
 
-This POC will fully rely on Azure Application Insight's `TelemetryClient` to easily set it up correctly and see how we can port this to Arcus Observability & Serilog.
+![](media/how-it-works.png)
 
 ### Requirements
 
@@ -40,6 +40,28 @@ This means that we are handling the operation ID (aka `operation_Id`) correctly 
 
 Learn more in [this example](https://docs.microsoft.com/en-us/azure/azure-monitor/app/correlation#example).
 
+### Current Status
+
+- [x] Provide support for linking service-to-service interactions across components through HTTP
+- [x] Provide support for linking service-to-service interactions across components through Azure Service Bus
+- [x] Provide support for tracking requests from an Azure Service Bus queue
+- [x] Provide convenient way to correlate across services through HTTP
+- [x] Provide convenient way to correlate across services through Azure Service Bus
+- [x] Provide operation names for Request, Dependency, Event & Metric
+- [x] Provide better target names for depenendencies
+- [x] Provide source information for Service Bus requests
+- [ ] Remove all Arcus code that has not been changed
+- [ ] Provide fully identical end-to-end transaction details similar to official SDK
+- [ ] Provide documentation on how it works & required actions
+
+Here is what the end-to-end correlation across component looks like:
+
+![](media/serilog-end-to-end-correlation.png)
+
+When looking at the telemetry tree, it looks as following:
+
+![](media/serilog-tree-overview.png)
+
 ### What is not included
 
 - Integrate Azure API Management with our Arcus Observability (see [arcus-azure/arcus-api-gateway-poc](https://github.com/arcus-azure/arcus-api-gateway-poc) instead)
@@ -62,17 +84,13 @@ Before you can run this, you need to:
 > 💡 This is currently achieved by using the Azure Application Insights SDK.
 >    We will port this to purely `TelemetryClient` to know where we need to track what.
 
-When creating an order, the following flow occurs:
-
-![](media/how-it-works.png)
-
 Here is what the end-to-end correlation across component looks like:
 
-![](media/end-to-end-correlation.png)
+![](media/official-sdk-end-to-end-correlation.png)
 
 When looking at the telemetry tree, it looks as following:
 
-![](media/tree-overview.png)
+![](media/official-sdk-tree-overview.png)
 
 You can download the raw telemetry [here](raw-telemetry.csv).
 
