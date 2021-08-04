@@ -92,7 +92,10 @@ We can leverage the same capabilities through Serilog if we get inspiration from
 ## Action items
 
 - [ ] Support operation (parent) IDs with `:`
-- [ ] Provide a convenient way to do this automatically when using `HttpClient`
+- [ ] Provide a convenient way to automatically support service-to-service correlation with `HttpClient`
+- [ ] Provide a convenient way to automatically support service-to-service correlation with Service Bus (extension?)
+- [ ] Provide support for tracking a request source (Azure Service Bus only)
+- [ ] Improve target names for depenendencies
 - [ ] Provide support for upstream operation IDs with Arcus Messaging
 - [ ] Provide name for all dependency and request telemetry items
 - [ ] Upgrade Arcus Observability dependency in Arcus Messaging to v2.x, instead of v0.x

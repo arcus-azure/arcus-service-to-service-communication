@@ -84,7 +84,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             context = context ?? new Dictionary<string, object>();
 
             Uri requestUri = request.RequestUri;
-            string targetName = requestUri.Host;
+            string targetName = $"{requestUri.Host}:{requestUri.Port}";
             HttpMethod requestMethod = request.Method;
             dependencyId = string.IsNullOrWhiteSpace(dependencyId) ? Guid.NewGuid().ToString() : dependencyId;
             string dependencyName = $"{requestMethod} {requestUri.AbsolutePath}";
@@ -105,6 +105,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
 
         public static void LogExtendedServiceBusQueueDependency(
             this ILogger logger,
+            string serviceBusNamespaceEndpoint,
             string queueName,
             bool isSuccessful,
             DependencyMeasurement measurement,
@@ -114,7 +115,8 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             Guard.NotNull(logger, nameof(logger), "Requires a logger instance to track telemetry");
             Guard.NotNull(measurement, nameof(measurement), "Requires a dependency measurement instance to track the latency of the Azure Service Bus Queue when tracking the Azure Service Bus Queue dependency");
 
-            LogExtendedServiceBusDependency(logger, queueName, dependencyId, isSuccessful, measurement.StartTime, measurement.Elapsed, context: context);
+            var target = $"{serviceBusNamespaceEndpoint} | {queueName}";
+            LogExtendedServiceBusDependency(logger, target, dependencyId, isSuccessful, measurement.StartTime, measurement.Elapsed, context: context);
         }
 
         /// <summary>
@@ -131,6 +133,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="duration"/> is a negative time range.</exception>
         public static void LogExtendedServiceBusQueueDependency(
             this ILogger logger,
+            string serviceBusNamespaceEndpoint,
             string queueName,
             bool isSuccessful,
             DateTimeOffset startTime,
@@ -142,12 +145,14 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             Guard.NotNullOrWhitespace(queueName, nameof(queueName), "Requires a non-blank Azure Service Bus Queue name to track an Azure Service Bus Queue dependency");
             Guard.NotLessThan(duration, TimeSpan.Zero, nameof(duration), "Requires a positive time duration of the Azure Service Bus Queue operation");
 
-            LogExtendedServiceBusDependency(logger, queueName, dependencyId, isSuccessful, startTime, duration, ServiceBusEntityType.Queue, context);
+            var target = $"{serviceBusNamespaceEndpoint} | {queueName}";
+
+            LogExtendedServiceBusDependency(logger, target, dependencyId, isSuccessful, startTime, duration, ServiceBusEntityType.Queue, context);
         }
 
         public static void LogExtendedServiceBusDependency(
             this ILogger logger,
-            string entityName,
+            string target,
             string dependencyId,
             bool isSuccessful,
             DateTimeOffset startTime,
@@ -156,7 +161,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             Dictionary<string, object> context = null)
         {
             Guard.NotNull(logger, nameof(logger), "Requires a logger instance to track telemetry");
-            Guard.NotNullOrWhitespace(entityName, nameof(entityName), "Requires a non-blank Azure Service Bus entity name to track an Azure Service Bus dependency");
+            Guard.NotNullOrWhitespace(target, nameof(target), "Requires a non-blank Azure Service Bus entity name to track an Azure Service Bus dependency");
             Guard.NotLessThan(duration, TimeSpan.Zero, nameof(duration), "Requires a positive time duration of the Azure Service Bus operation");
 
             context = context ?? new Dictionary<string, object>();
@@ -167,7 +172,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
                 dependencyId: dependencyId,
                 dependencyName: null,
                 dependencyData: null,
-                targetName: entityName,
+                targetName: target,
                 duration: duration,
                 startTime: startTime,
                 resultCode: null,

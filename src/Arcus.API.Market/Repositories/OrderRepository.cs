@@ -55,7 +55,8 @@ namespace Arcus.API.Market.Repositories
                 finally
                 {
                     // TODO: Support linking as well
-                    _logger.LogExtendedServiceBusQueueDependency(_queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
+                    var serviceBusEndpoint = _queueClient.ServiceBusConnection.Endpoint.ToString();
+                    _logger.LogExtendedServiceBusQueueDependency(serviceBusEndpoint, _queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
                 }                
             }
         }
