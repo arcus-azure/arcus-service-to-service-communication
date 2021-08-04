@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Arcus.Messaging.Abstractions;
 using Arcus.POC.Messaging.Abstractions;
 using GuardNet;
 using Newtonsoft.Json;

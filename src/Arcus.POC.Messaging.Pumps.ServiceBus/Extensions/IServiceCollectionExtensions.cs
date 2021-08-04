@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Arcus.POC.Messaging.Abstractions;
 using Arcus.POC.Messaging.Pumps.Abstractions.MessageHandling;
@@ -8,9 +7,7 @@ using Arcus.POC.Messaging.Pumps.ServiceBus.Configuration;
 using Arcus.POC.Messaging.Pumps.ServiceBus.MessageHandling;
 using Arcus.Security.Core;
 using GuardNet;
-using Microsoft.Azure.ServiceBus.Core;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 // ReSharper disable once CheckNamespace

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Arcus.Messaging.Abstractions;
 using Arcus.POC.Messaging.Abstractions;
 using GuardNet;
 

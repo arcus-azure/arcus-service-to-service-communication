@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Threading.Tasks;
 using Arcus.API.Market.Repositories.Interfaces;
 using Arcus.Observability.Correlation;
@@ -9,7 +8,6 @@ using Arcus.Shared.Messages;
 using GuardNet;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace Arcus.API.Market.Repositories
 {
