@@ -8,9 +8,17 @@ POC to have end-to-end correlation stitching operations across services together
 
 Provide end-to-end correlation stitching operations across services together in the Azure Application Insights Application Map.
 
-Depending on progress, we will include a message broker in the middle to see if we can plot it correctly on the Application Map as well.
+When creating an order, the following flow occurs:
 
-This POC will fully rely on Azure Application Insight's `TelemetryClient` to easily set it up correctly and see how we can port this to Arcus Observability & Serilog.
+![](media/how-it-works.png)
+
+### Requirements
+
+- Correlate across services in the Azure Application Insights Application Map
+    - Support for HTTP dependencies
+    - Support for Service Bus dependencies
+- Correlate multiple interactions in the same operation & component, in a tree-manner
+- Ensure the measured dependencies are comparable to the native Azure Application Insights telemetry
 
 ### Official Telemetry Correlation Guidance
 
@@ -32,6 +40,28 @@ This means that we are handling the operation ID (aka `operation_Id`) correctly 
 
 Learn more in [this example](https://docs.microsoft.com/en-us/azure/azure-monitor/app/correlation#example).
 
+### Current Status
+
+- [x] Provide support for linking service-to-service interactions across components through HTTP
+- [x] Provide support for linking service-to-service interactions across components through Azure Service Bus
+- [x] Provide support for tracking requests from an Azure Service Bus queue
+- [x] Provide convenient way to correlate across services through HTTP
+- [x] Provide convenient way to correlate across services through Azure Service Bus
+- [x] Provide operation names for Request, Dependency, Event & Metric
+- [x] Provide better target names for depenendencies
+- [x] Provide source information for Service Bus requests
+- [ ] Remove all Arcus code that has not been changed
+- [ ] Provide fully identical end-to-end transaction details similar to official SDK
+- [ ] Provide documentation on how it works & required actions
+
+Here is what the end-to-end correlation across component looks like:
+
+![](media/serilog-end-to-end-correlation.png)
+
+When looking at the telemetry tree, it looks as following:
+
+![](media/serilog-tree-overview.png)
+
 ### What is not included
 
 - Integrate Azure API Management with our Arcus Observability (see [arcus-azure/arcus-api-gateway-poc](https://github.com/arcus-azure/arcus-api-gateway-poc) instead)
@@ -49,36 +79,25 @@ Before you can run this, you need to:
 }
 ```
 
-## How Does it Work?
+## How Does it Work with Azure Application Insights SDK?
 
 > 💡 This is currently achieved by using the Azure Application Insights SDK.
 >    We will port this to purely `TelemetryClient` to know where we need to track what.
 
-When creating an order, the following flow occurs:
-
-![](media/how-it-works.png)
-
 Here is what the end-to-end correlation across component looks like:
 
-![](media/end-to-end-correlation.png)
+![](media/official-sdk-end-to-end-correlation.png)
 
 When looking at the telemetry tree, it looks as following:
 
-![](media/tree-overview.png)
+![](media/official-sdk-tree-overview.png)
 
 You can download the raw telemetry [here](raw-telemetry.csv).
 
-## Action items
+### Learnings
 
-None at the moment.
-
-_Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
-
-## Clarification Required
-
-None at the moment.
-
-## Learnings
+- The `operationId` is identical in every component, so we have to propogate it to correlate across components.
+- The `id` of the dependency in the initial component must match the `operationParentId` of the request in the second component.
 
 We can leverage the same capabilities through Serilog if we get inspiration from the Azure Application Insights SDK:
 
@@ -87,3 +106,20 @@ We can leverage the same capabilities through Serilog if we get inspiration from
 - [`RequestTrackingTelemetryModule`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/RequestTrackingTelemetryModule.cs)
 - [`OperationNameTelemetryInitializer`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/OperationNameTelemetryInitializer.cs)
 - [`AuthenticatedUserIdTelemetryInitializer`](https://github.com/microsoft/ApplicationInsights-dotnet/blob/develop/WEB/Src/Web/Web/AuthenticatedUserIdTelemetryInitializer.cs)
+
+## Action items
+
+- [ ] Support operation (parent) IDs with `:`
+- [ ] Provide a convenient way to automatically support service-to-service correlation with `HttpClient`
+- [ ] Provide a convenient way to automatically support service-to-service correlation with Service Bus (extension?)
+- [ ] Provide support for tracking a request source (Azure Service Bus only)
+- [ ] Improve target names for depenendencies
+- [ ] Provide support for upstream operation IDs with Arcus Messaging
+- [ ] Provide name for all dependency and request telemetry items
+- [ ] Upgrade Arcus Observability dependency in Arcus Messaging to v2.x, instead of v0.x
+
+_Some of the action items can be easily found by searching for `TODO: Contribute Upstream` or using the Task List._
+
+## Clarification Required
+
+None at the moment.

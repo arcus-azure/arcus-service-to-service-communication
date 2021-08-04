@@ -23,7 +23,7 @@ namespace Arcus.Shared
         }
 
         /// <summary>
-        /// Gets the configuration of key/value apeplication properties.
+        /// Gets the configuration of key/value application properties.
         /// </summary>
         public IConfiguration Configuration { get; }
 
