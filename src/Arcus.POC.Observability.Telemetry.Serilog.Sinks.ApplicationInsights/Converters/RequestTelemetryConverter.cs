@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Arcus.Observability.Telemetry.Core;
-using Arcus.Observability.Telemetry.Core.Logging;
 using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using GuardNet;
 using Microsoft.ApplicationInsights.DataContracts;
@@ -26,7 +25,6 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             Guard.NotNull(logEvent.Properties, nameof(logEvent), "Requires a Serilog event with a set of properties to create an Azure Application Insights Request telemetry instance");
             
             StructureValue logEntry = logEvent.Properties.GetAsStructureValue(ContextProperties.RequestTracking.RequestLogEntry);
-            string requestMethod = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.RequestMethod));
             string requestHost = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.RequestHost));
             string requestUri = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.RequestUri));
             string responseStatusCode = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.ResponseStatusCode));
@@ -42,15 +40,29 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             bool isSuccessfulRequest = DetermineRequestOutcome(responseStatusCode);
             
             var url = DetermineUrl(sourceSystem, requestHost, requestUri);
+            var source = DetermineRequestSource(sourceSystem, sourceName, context);
 
             var requestTelemetry = new RequestTelemetry(sourceName, requestTime, requestDuration, responseStatusCode, isSuccessfulRequest)
             {
                 Id = requestTelemetryId,
                 Url = url,
+                Source = source
             };
 
             requestTelemetry.Properties.AddRange(context);
             return requestTelemetry;
+        }
+
+        private string DetermineRequestSource(string sourceSystem, string sourceName, IDictionary<string, string> context)
+        {
+            if (sourceSystem != "Azure Service Bus")
+            {
+                return null;
+            }
+
+            var entityName = context["ServiceBus-Entity"];
+            var namespaceEndpoint = context["ServiceBus-Endpoint"];
+            return $"type:Azure Service Bus | name:{entityName} | endpoint:sb://{namespaceEndpoint}.servicebus.windows.net/";
         }
 
         private static Uri DetermineUrl(string sourceSystem, string requestHost, string requestUri)

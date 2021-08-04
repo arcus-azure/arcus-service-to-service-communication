@@ -591,7 +591,9 @@ namespace Arcus.POC.Messaging.Pumps.ServiceBus
                     }
                     finally
                     {
-                        Logger.LogServiceBusQueueRequest(isSuccessful, dependencyMeasurement.Elapsed, dependencyMeasurement.StartTime);
+                        var entityName = _messageReceiver.Path;
+                        var serviceBusNamespace = _messageReceiver.ServiceBusConnection.Endpoint.ToString();
+                        Logger.LogServiceBusQueueRequest(serviceBusNamespace, entityName, isSuccessful, dependencyMeasurement.Elapsed, dependencyMeasurement.StartTime);
                     }
                 }
             }

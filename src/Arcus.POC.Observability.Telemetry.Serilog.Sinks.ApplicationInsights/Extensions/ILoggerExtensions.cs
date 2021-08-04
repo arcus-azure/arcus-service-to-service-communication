@@ -332,14 +332,21 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
         ///     Thrown when the <paramref name="request"/>'s scheme contains whitespace, the <paramref name="request"/>'s host is missing or contains whitespace.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="duration"/> is a negative time range.</exception>
-        public static void LogServiceBusQueueRequest(this ILogger logger, bool isSuccessful, TimeSpan duration, DateTimeOffset startTime, Dictionary<string, object> context = null, string operationName = null)
+        public static void LogServiceBusQueueRequest(this ILogger logger, string namespaceEndpoint, string entityName, bool isSuccessful, TimeSpan duration, DateTimeOffset startTime, Dictionary<string, object> context = null, string operationName = null)
         {
             Guard.NotNull(logger, nameof(logger), "Requires a logger instance to track telemetry");
             Guard.NotLessThan(duration, TimeSpan.Zero, nameof(duration), "Requires a positive time duration of the HTTP request");
 
             context = context ?? new Dictionary<string, object>();
             operationName = string.IsNullOrWhiteSpace(operationName) ? "Process" : operationName;
-            logger.LogWarning(MessageFormats.RequestFormat, new ExtendedRequestLogEntry(isSuccessful, duration, "Azure Service Bus Queue", operationName, context, startTime));
+
+            // TODO: Add validation for endpoint as it should be 'sb://{name}.servicebus.windows.net/'
+            // Keep in mind that for other clouds the suffix might be different
+
+            context["ServiceBus-Entity"] = entityName;
+            context["ServiceBus-Endpoint"] = namespaceEndpoint;
+
+            logger.LogWarning(MessageFormats.RequestFormat, new ExtendedRequestLogEntry(isSuccessful, duration, "Azure Service Bus", operationName, context, startTime));
         }
     }
     /// <summary>
