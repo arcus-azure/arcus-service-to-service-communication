@@ -42,6 +42,7 @@ namespace Microsoft.Azure.ServiceBus
                 serviceBusMessage.UserProperties.Add(PropertyNames.TransactionId, transactionId);
             }
 
+            // Contribute Upstream: Annnotating messages with operation information
             if (string.IsNullOrWhiteSpace(operationParentId) == false)
             {
                 serviceBusMessage.UserProperties.Add(PropertyNames.OperationParentId, operationParentId);
