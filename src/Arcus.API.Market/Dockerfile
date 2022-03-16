@@ -4,16 +4,14 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1.202-alpine3.10 AS build
 WORKDIR /src
-COPY ["Arcus.API.Salads.csproj", ""]
-
+COPY ["./Arcus.API.Market/Arcus.API.Market.csproj", ""]
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "Arcus.API.Salads.csproj" -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish "Arcus.API.Salads.csproj" -c Release -o /app
+RUN dotnet publish "./Arcus.API.Market/Arcus.API.Market.csproj" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "Arcus.API.Salads.dll"]
+ENTRYPOINT ["dotnet", "Arcus.API.Market.dll"]
+                                                                                                      

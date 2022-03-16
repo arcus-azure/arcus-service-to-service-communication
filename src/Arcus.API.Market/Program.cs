@@ -46,8 +46,7 @@ namespace Arcus.API.Market
         {
             IConfigurationRoot configuration =
                 new ConfigurationBuilder()
-                    .AddCommandLine(args)
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .AddCommandLine(args)                    
                     .AddEnvironmentVariables()
                     .Build();
 
@@ -62,12 +61,7 @@ namespace Arcus.API.Market
                     .ConfigureAppConfiguration(configBuilder => configBuilder.AddConfiguration(configuration))
                     .ConfigureSecretStore((config, stores) =>
                     {
-#if DEBUG
                         stores.AddConfiguration(config);
-#endif
-
-                        //#error Please provide a valid secret provider, for example Azure Key Vault: https://security.arcus-azure.net/features/secrets/consume-from-key-vault
-                        stores.AddAzureKeyVaultWithManagedServiceIdentity("https://your-keyvault.vault.azure.net/");
                     })
                     .UseSerilog(DefineLoggerConfiguration)
                     .ConfigureWebHostDefaults(webBuilder =>

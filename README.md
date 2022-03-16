@@ -70,9 +70,13 @@ When looking at the telemetry tree, it looks as following:
 
 Before you can run this, you need to:
 
-1. Run solution with Docker Compose
-2. Get bacon by calling the API - GET http://localhost:789/api/v1/bacon
-3. Create order to eat bacon asynchronously by calling the API - POST http://localhost:787/api/v1/market
+1. Create an Application Insights resource in your Azure Subscription
+2. Create an Azure Service Bus namespace resource in your Azure Subscription
+3. Create a queue called `orders` in the Azure Service Bus namespace
+4. Create a `docker-compose.override.yml` file and set the Application Insights instrumentation key and Service Bus connectionstring
+5. Run solution with Docker Compose by running `docker compose up`
+6. Get bacon by calling the API - GET http://localhost:789/api/v1/bacon
+7. Create order to eat bacon asynchronously by calling the API - POST http://localhost:787/api/v1/market
 ```json
 {
     "amount": 2

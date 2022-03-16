@@ -9,7 +9,7 @@ namespace Arcus.Shared
 {
     public class SerilogFactory
     {
-        private const string ApplicationInsightsInstrumentationKeyName = "ApplicationInsights_InstrumentationKey";
+        private const string ApplicationInsightsInstrumentationKeyName = "APPINSIGHTS_INSTRUMENTATIONKEY";
 
         public static void ConfigureSerilog(string componentName, LoggerConfiguration loggerConfiguration, IConfiguration configuration, IServiceProvider serviceProvider, bool useHttpCorrelation = true)
         {
