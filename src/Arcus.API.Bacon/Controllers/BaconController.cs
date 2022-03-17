@@ -37,9 +37,7 @@ namespace Arcus.API.Bacon.Controllers
         /// <remarks>Provides an overview of various bacon flavors.</remarks>
         /// <response code="200">Bacon is served!</response>
         /// <response code="503">Uh-oh! Things went wrong</response>
-        [HttpGet(Name = "Bacon_Get")]
-        [ProducesResponseType(typeof(HealthReport), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(HealthReport), StatusCodes.Status503ServiceUnavailable)]
+        [HttpGet(Name = "Bacon_Get")]        
         [SwaggerResponseHeader(200, "RequestId", "string", "The header that has a request ID that uniquely identifies this operation call")]
         [SwaggerResponseHeader(200, "X-Transaction-Id", "string", "The header that has the transaction ID is used to correlate multiple operation calls.")]
         public async Task<IActionResult> Get()

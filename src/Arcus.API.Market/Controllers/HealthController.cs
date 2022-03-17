@@ -33,9 +33,7 @@ namespace Arcus.API.Market.Controllers
         /// <remarks>Provides an indication about the health of the API.</remarks>
         /// <response code="200">API is healthy</response>
         /// <response code="503">API is unhealthy or in degraded state</response>
-        [HttpGet(Name = "Health_Get")]
-        [ProducesResponseType(typeof(HealthReport), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(HealthReport), StatusCodes.Status503ServiceUnavailable)]
+        [HttpGet(Name = "Health_Get")]        
         [SwaggerResponseHeader(200, "RequestId", "string", "The header that has a request ID that uniquely identifies this operation call")]
         [SwaggerResponseHeader(200, "X-Transaction-Id", "string", "The header that has the transaction ID is used to correlate multiple operation calls.")]
         public async Task<IActionResult> Get()
