@@ -74,9 +74,12 @@ Before you can run this, you need to:
 2. Create an Azure Service Bus namespace resource in your Azure Subscription
 3. Create a queue called `orders` in the Azure Service Bus namespace
 4. Create a `docker-compose.override.yml` file and set the Application Insights instrumentation key and Service Bus connectionstring
-5. Run solution with Docker Compose by running `docker compose up`
+5. Run solution with Docker Compose by running `docker compose up` from the folder where the `docker-compose.yml` file is located
 6. Get bacon by calling the API - GET http://localhost:789/api/v1/bacon
 7. Create order to eat bacon asynchronously by calling the API - POST http://localhost:787/api/v1/market
+
+> You can use a tool like Postman to perform API requests, or you can use the Swagger UI page which is available at `localhost:787/api/docs` for the Market API and at `localhost:789/api/docs` for the Bacon API.
+
 ```json
 {
     "amount": 2
