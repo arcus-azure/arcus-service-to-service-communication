@@ -44,8 +44,6 @@ namespace Arcus.API.Market.Controllers
         /// <response code="201">Order is created</response>
         /// <response code="503">Uh-oh! Things went wrong</response>
         [HttpPost(Name = "Market_CreateOrder")]
-        [ProducesResponseType(typeof(HealthReport), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(HealthReport), StatusCodes.Status503ServiceUnavailable)]
         [SwaggerResponseHeader(201, "RequestId", "string", "The header that has a request ID that uniquely identifies this operation call")]
         [SwaggerResponseHeader(201, "X-Transaction-Id", "string", "The header that has the transaction ID is used to correlate multiple operation calls.")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderRequest orderRequest)

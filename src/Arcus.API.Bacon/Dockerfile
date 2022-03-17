@@ -4,14 +4,14 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1.202-alpine3.10 AS build
 WORKDIR /src
-COPY ["Arcus.API.Bacon.csproj", ""]
 
-COPY . .
-WORKDIR "/src/."
-RUN dotnet build "Arcus.API.Bacon.csproj" -c Release -o /app
+COPY ["./Arcus.API.Bacon/Arcus.API.Bacon.csproj", ""]
+COPY . ./
+
+WORKDIR "/src"
 
 FROM build AS publish
-RUN dotnet publish "Arcus.API.Bacon.csproj" -c Release -o /app
+RUN dotnet publish "./Arcus.API.Bacon/Arcus.API.Bacon.csproj" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
