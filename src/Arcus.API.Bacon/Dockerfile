@@ -4,12 +4,9 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1.202-alpine3.10 AS build
 WORKDIR /src
-RUN ls -la
+
 COPY ["./Arcus.API.Bacon/Arcus.API.Bacon.csproj", ""]
-
 COPY . ./
-
-CMD ls -la
 
 WORKDIR "/src"
 
