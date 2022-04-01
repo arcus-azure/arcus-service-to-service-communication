@@ -563,7 +563,7 @@ namespace Arcus.POC.Messaging.Pumps.ServiceBus
             {
                 // TODO: Simplify this approach
                 bool isSuccessful = false;
-                using(var dependencyMeasurement = DependencyMeasurement.Start("Process"))
+                using(var dependencyMeasurement = DurationMeasurement.Start())
                 {
                     try
                     {
@@ -593,7 +593,10 @@ namespace Arcus.POC.Messaging.Pumps.ServiceBus
                     {
                         var entityName = _messageReceiver.Path;
                         var serviceBusNamespace = _messageReceiver.ServiceBusConnection.Endpoint.ToString();
-                        Logger.LogServiceBusQueueRequest(serviceBusNamespace, entityName, isSuccessful, dependencyMeasurement.Elapsed, dependencyMeasurement.StartTime);
+                        Logger.LogServiceBusQueueRequest(serviceBusNamespace, entityName, isSuccessful,
+                                                         dependencyMeasurement.StartTime,
+                                                         dependencyMeasurement.Elapsed,
+                                                         operationName: "Process");
                     }
                 }
             }

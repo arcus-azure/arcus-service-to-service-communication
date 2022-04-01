@@ -43,7 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            using (var httpDependencyMeasurement = DependencyMeasurement.Start())
+            using (var httpDependencyMeasurement = DurationMeasurement.Start())
             {
                 var newDependencyId = Guid.NewGuid().ToString();
                 // TODO: Fix DI scoping issue here again, doesn't work for messaging

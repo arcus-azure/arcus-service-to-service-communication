@@ -35,7 +35,7 @@ namespace Arcus.API.Market.Repositories
                 Amount = amount
             };
 
-            using (var serviceBusDependencyMeasurement = DependencyMeasurement.Start("Order Bacon"))
+            using (var serviceBusDependencyMeasurement = DurationMeasurement.Start())
             {
                 bool isSuccessful = false;
                 var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
@@ -54,6 +54,7 @@ namespace Arcus.API.Market.Repositories
                 {
                     // TODO: Support linking as well
                     var serviceBusEndpoint = _queueClient.ServiceBusConnection.Endpoint.ToString();
+                    _logger.LogInformation($"Done sending at {DateTimeOffset.UtcNow}");
                     _logger.LogExtendedServiceBusQueueDependency(serviceBusEndpoint, _queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
                 }                
             }
