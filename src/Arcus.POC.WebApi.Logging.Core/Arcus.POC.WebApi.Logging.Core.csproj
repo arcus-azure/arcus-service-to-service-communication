@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <Authors>Arcus</Authors>
     <Company>Arcus</Company>
     <RepositoryType>Git</RepositoryType>
@@ -27,8 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Arcus.Observability.Telemetry.Core" Version="2.2.2" />
-    <PackageReference Include="Arcus.Observability.Correlation" Version="2.2.2" />
+    <PackageReference Include="Arcus.Observability.Telemetry.Core" Version="2.4.0" />
+    <PackageReference Include="Arcus.Observability.Correlation" Version="2.4.0" />
     <PackageReference Include="Guard.Net" Version="1.2.0" />
   </ItemGroup>
 

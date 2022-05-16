@@ -30,7 +30,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             this ILogger logger,
             HttpRequestMessage request,
             HttpStatusCode statusCode,
-            DependencyMeasurement measurement,
+            DurationMeasurement measurement,
             Dictionary<string, object> context = null,
             string dependencyId = null)
         {
@@ -108,7 +108,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             string serviceBusNamespaceEndpoint,
             string queueName,
             bool isSuccessful,
-            DependencyMeasurement measurement,
+            DurationMeasurement measurement,
             Dictionary<string, object> context = null,
             string dependencyId = null)
         {
@@ -202,6 +202,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             this ILogger logger,
             HttpRequestMessage request,
             HttpResponseMessage response,
+            DateTimeOffset requestTime,
             TimeSpan duration,
             Dictionary<string, object> context = null)
         {
@@ -215,7 +216,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             Guard.NotGreaterThan((int)response.StatusCode, 999, nameof(response), "Requires a HTTP response status code that's within the 0-999 range to track a HTTP request");
             Guard.NotLessThan(duration, TimeSpan.Zero, nameof(duration), "Requires a positive time duration of the request operation");
 
-            LogHttpRequest(logger, request, response.StatusCode, duration, context);
+            LogHttpRequest(logger, request, response.StatusCode, requestTime, duration, context);
         }
 
         /// <summary>
@@ -224,6 +225,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
         /// <param name="logger">The logger to track the telemetry.</param>
         /// <param name="request">Request that was done</param>
         /// <param name="responseStatusCode">HTTP status code returned by the service</param>
+        /// <param name="requestTime">The timestamp at which the request was started.</param>
         /// <param name="duration">Duration of the operation</param>
         /// <param name="context">Context that provides more insights on the HTTP request that was tracked</param>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="logger"/> or <paramref name="request"/> is <c>null</c>.</exception>
@@ -240,6 +242,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             this ILogger logger,
             HttpRequestMessage request,
             HttpStatusCode responseStatusCode,
+            DateTimeOffset requestTime,
             TimeSpan duration,
             Dictionary<string, object> context = null)
         {
@@ -258,14 +261,16 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             string resourcePath = request.RequestUri.AbsolutePath;
             string host = $"{request.RequestUri.Scheme}://{request.RequestUri.Host}";
 
-            logger.LogWarning(RequestFormat, new ExtendedRequestLogEntry(request.Method.ToString(), host, resourcePath, statusCode, duration, context));
+            logger.LogWarning(RequestFormat, new ExtendedRequestLogEntry(request.Method.ToString(), host, resourcePath, statusCode, requestTime, duration, context));
         }
+
         /// <summary>
         ///     Logs an HTTP request
         /// </summary>
         /// <param name="logger">Logger to use</param>
         /// <param name="request">Request that was done</param>
         /// <param name="response">Response that will be sent out</param>
+        /// <param name="requestTime">The time at which the request started</param>
         /// <param name="duration">Duration of the operation</param>
         /// <param name="context">Context that provides more insights on the HTTP request that was tracked</param>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="logger"/>, <paramref name="request"/>, or <paramref name="response"/> is <c>null</c></exception>
@@ -273,7 +278,13 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
         ///     Thrown when the <paramref name="request"/>'s scheme contains whitespace, the <paramref name="request"/>'s host is missing or contains whitespace.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="duration"/> is a negative time range.</exception>
-        public static void LogHttpRequest(this ILogger logger, HttpRequest request, HttpResponse response, TimeSpan duration, Dictionary<string, object> context = null)
+        public static void LogHttpRequest(
+            this ILogger logger, 
+            HttpRequest request, 
+            HttpResponse response, 
+            DateTimeOffset requestTime, 
+            TimeSpan duration, 
+            Dictionary<string, object> context = null)
         {
             Guard.NotNull(logger, nameof(logger), "Requires a logger instance to track telemetry");
             Guard.NotNull(request, nameof(request), "Requires a HTTP request instance to track a HTTP request");
@@ -287,7 +298,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             Guard.NotGreaterThan(response.StatusCode, 999, nameof(response), "Requires a HTTP response status code that's within the 0-999 range to track a HTTP request");
             Guard.NotLessThan(duration, TimeSpan.Zero, nameof(duration), "Requires a positive time duration of the Azure Blob storage operation");
 
-            LogHttpRequest(logger, request, response.StatusCode, duration, context);
+            LogHttpRequest(logger, request, response.StatusCode, requestTime, duration, context);
         }
 
         /// <summary>
@@ -296,6 +307,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
         /// <param name="logger">Logger to use</param>
         /// <param name="request">Request that was done</param>
         /// <param name="responseStatusCode">HTTP status code returned by the service</param>
+        /// <param name="requestTime">The time at which the request started.</param>
         /// <param name="duration">Duration of the operation</param>
         /// <param name="context">Context that provides more insights on the HTTP request that was tracked</param>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="logger"/> or <paramref name="request"/> is <c>null</c></exception>
@@ -303,7 +315,13 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
         ///     Thrown when the <paramref name="request"/>'s scheme contains whitespace, the <paramref name="request"/>'s host is missing or contains whitespace.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="duration"/> is a negative time range.</exception>
-        public static void LogHttpRequest(this ILogger logger, HttpRequest request, int responseStatusCode, TimeSpan duration, Dictionary<string, object> context = null)
+        public static void LogHttpRequest(
+            this ILogger logger, 
+            HttpRequest request, 
+            int responseStatusCode, 
+            DateTimeOffset requestTime, 
+            TimeSpan duration, 
+            Dictionary<string, object> context = null)
         {
             Guard.NotNull(logger, nameof(logger), "Requires a logger instance to track telemetry");
             Guard.NotNull(request, nameof(request), "Requires a HTTP request instance to track a HTTP request");
@@ -321,7 +339,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             PathString resourcePath = request.Path;
             var host = $"{request.Scheme}://{request.Host}";
 
-            logger.LogWarning(MessageFormats.RequestFormat, new ExtendedRequestLogEntry(request.Method, host, resourcePath, responseStatusCode, duration, context));
+            logger.LogWarning(MessageFormats.RequestFormat, new ExtendedRequestLogEntry(request.Method, host, resourcePath, responseStatusCode, requestTime, duration, context));
         }
 
         /// <summary>
@@ -337,7 +355,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
         ///     Thrown when the <paramref name="request"/>'s scheme contains whitespace, the <paramref name="request"/>'s host is missing or contains whitespace.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="duration"/> is a negative time range.</exception>
-        public static void LogServiceBusQueueRequest(this ILogger logger, string namespaceEndpoint, string entityName, bool isSuccessful, TimeSpan duration, DateTimeOffset startTime, Dictionary<string, object> context = null, string operationName = null)
+        public static void LogServiceBusQueueRequest(this ILogger logger, string namespaceEndpoint, string entityName, bool isSuccessful, DateTimeOffset requestTime, TimeSpan duration,  Dictionary<string, object> context = null, string operationName = null)
         {
             Guard.NotNull(logger, nameof(logger), "Requires a logger instance to track telemetry");
             Guard.NotLessThan(duration, TimeSpan.Zero, nameof(duration), "Requires a positive time duration of the HTTP request");
@@ -347,11 +365,11 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
 
             // TODO: Add validation for endpoint as it should be 'sb://{name}.servicebus.windows.net/'
             // Keep in mind that for other clouds the suffix might be different
-
+            // TODO: I wouldn't validate on the endpoint names.
             context["ServiceBus-Entity"] = entityName;
             context["ServiceBus-Endpoint"] = namespaceEndpoint;
 
-            logger.LogWarning(MessageFormats.RequestFormat, new ExtendedRequestLogEntry(isSuccessful, duration, "Azure Service Bus", operationName, context, startTime));
+            logger.LogWarning(MessageFormats.RequestFormat, new ExtendedRequestLogEntry(isSuccessful, duration, "Azure Service Bus", operationName, requestTime, context));
         }
     }
     /// <summary>
@@ -491,14 +509,14 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
           TimeSpan duration,
           string sourceSystem,
           string sourceName,
-          IDictionary<string, object> context,
-          DateTimeOffset? requestTime)
+          DateTimeOffset requestTime,
+          IDictionary<string, object> context)
         {
-            DateTimeOffset decidedRequestTime = requestTime ?? DateTimeOffset.UtcNow;
+            DateTimeOffset decidedRequestTime = requestTime;
             this.RequestMethod = "method";
             this.RequestHost = "host";
             this.RequestUri = "uri";
-            this.ResponseStatusCode = isSuccessful?200:500;
+            this.ResponseStatusCode = isSuccessful ? 200 : 500;
             this.RequestDuration = duration;
             this.RequestTime = decidedRequestTime.ToString(FormatSpecifiers.InvariantTimestampFormat);
             this.SourceSystem = sourceSystem;
@@ -511,6 +529,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             string host,
             string uri,
             int statusCode,
+            DateTimeOffset requestTime,
             TimeSpan duration,
             IDictionary<string, object> context)
         {
@@ -524,7 +543,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             RequestUri = uri;
             ResponseStatusCode = statusCode;
             RequestDuration = duration;
-            RequestTime = DateTimeOffset.UtcNow.ToString(FormatSpecifiers.InvariantTimestampFormat);
+            RequestTime = requestTime.ToString(FormatSpecifiers.InvariantTimestampFormat);
             Context = context;
             SourceSystem = "HTTP";
             SourceName = $"{method}{uri}";

@@ -23,7 +23,7 @@ namespace Arcus.API.Bacon.Repositories
 
         public async Task<List<string>> GetFlavorsAsync()
         {
-            using (var dependencyMeasurement = DependencyMeasurement.Start("Get Bacon"))
+            using (var durationMeasurement = DurationMeasurement.Start())
             {
                 try
                 {
@@ -45,7 +45,7 @@ namespace Arcus.API.Bacon.Repositories
                 finally
                 {
                     // Normally you would do it in the repo but ok
-                    _logger.LogSqlDependency("example-server", "bacon-db", "flavors", isSuccessful:true, dependencyMeasurement);
+                    _logger.LogSqlDependency("example-server", "bacon-db", "flavors", isSuccessful: true, operationName: "Get Bacon", startTime: durationMeasurement.StartTime , duration: durationMeasurement.Elapsed);
                 }
             }
 

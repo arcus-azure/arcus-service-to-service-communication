@@ -13,7 +13,7 @@ namespace System.Net.Http
         // TODO: Contribute Upstream - HTTP service-to-service automagical tracking - Option #2 - Use extension, but end-users need to specify all dependencies
         public static async Task<HttpResponseMessage> SendAndTrackDependencyAsync(this HttpClient httpClient, string operationName, HttpRequestMessage request, ICorrelationInfoAccessor correlationInfoAccessor, ILogger logger)
         {
-            using (var httpDependencyMeasurement = DependencyMeasurement.Start(operationName))
+            using (var httpDependencyMeasurement = DurationMeasurement.Start())
             {
                 var newDependencyId = Guid.NewGuid().ToString();
                 var correlationInfo = correlationInfoAccessor.GetCorrelationInfo();

@@ -36,10 +36,17 @@ namespace Arcus.Shared.Services
         {
             var url = _configuration["Bacon_API_Url"];
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"http://{url}/api/v1/bacon");
+            var requestUri = $"http://{url}/api/v1/bacon";
+
+            _logger.LogInformation($"Requesting BACON at {requestUri}");
+
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             var response = await SendHttpRequestAsync("Get Bacon", request);
-            if (response.IsSuccessStatusCode == false) throw new Exception("Unable to get bacon");
+            if (response.IsSuccessStatusCode == false)
+            {
+                throw new Exception("Unable to get bacon");
+            }
 
             var rawResponse = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<List<string>>(rawResponse);

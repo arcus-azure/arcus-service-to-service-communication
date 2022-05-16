@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Arcus.Observability.Telemetry.Core;
 using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using GuardNet;
 using Microsoft.AspNetCore.Http;
@@ -80,7 +81,7 @@ namespace Arcus.POC.WebApi.Logging
                     RequestTrackingAttribute[] attributes = DetermineAppliedAttributes(endpoint);
                     Exclude filter = DetermineExclusionFilter(attributes);
                     StatusCodeRange[] trackedStatusCodeRanges = DetermineTrackedStatusCodeRanges(attributes);
-                
+
                     await TrackRequest(httpContext, filter, trackedStatusCodeRanges);
                 }
             }
@@ -89,7 +90,7 @@ namespace Arcus.POC.WebApi.Logging
         private bool IsRequestPathOmitted(HttpRequest request)
         {
             IEnumerable<string> allOmittedRoutes = _options.OmittedRoutes ?? new Collection<string>();
-            string[] matchedOmittedRoutes = 
+            string[] matchedOmittedRoutes =
                 allOmittedRoutes
                     .Select(omittedRoute => omittedRoute?.StartsWith("/") == true ? omittedRoute : "/" + omittedRoute)
                     .Where(omittedRoute => request.Path.StartsWithSegments(omittedRoute, StringComparison.OrdinalIgnoreCase))
@@ -100,10 +101,10 @@ namespace Arcus.POC.WebApi.Logging
                 string endpoint = request.GetDisplayUrl();
                 string formattedOmittedRoutes = String.Join(", ", matchedOmittedRoutes);
                 _logger.LogTrace("Skip request tracking for endpoint '{Endpoint}' due to an omitted route(s) '{OmittedRoutes}' specified in the options", endpoint, formattedOmittedRoutes);
-                
+
                 return true;
             }
-            
+
             return false;
         }
 
@@ -114,7 +115,7 @@ namespace Arcus.POC.WebApi.Logging
                 _logger.LogTrace("Cannot determine whether or not the endpoint contains the '{OptionsAttribute}' because the endpoint tracking (`IApplicationBuilder.UseRouting()` or `.UseEndpointRouting()`) was not activated before the request tracking middleware; or the route was not found", nameof(RequestTrackingAttribute));
                 return Array.Empty<RequestTrackingAttribute>();
             }
-            
+
             RequestTrackingAttribute[] attributes = endpoint.Endpoint.Metadata.OfType<RequestTrackingAttribute>().ToArray();
             return attributes;
         }
@@ -126,7 +127,7 @@ namespace Arcus.POC.WebApi.Logging
                 _logger.LogTrace("No '{Attribute}' found on endpoint, continue with request tracking including both request and response bodies", nameof(ExcludeRequestTrackingAttribute));
                 return Exclude.None;
             }
-            
+
             Exclude filter = attributes.Aggregate(Exclude.None, (acc, item) => acc | item.Filter);
             return filter;
         }
@@ -138,21 +139,22 @@ namespace Arcus.POC.WebApi.Logging
                 _logger.LogTrace("No '{Attribute}' found on endpoint, continue with request tracking including all HTTP status codes", nameof(ExcludeRequestTrackingAttribute));
                 return Array.Empty<StatusCodeRange>();
             }
-            
-            StatusCodeRange[] statusCodes = 
+
+            StatusCodeRange[] statusCodes =
                 attributes.Where(attribute => attribute.StatusCodeRange != null)
                           .Select(attribute => attribute.StatusCodeRange)
                           .ToArray();
-            
+
             return statusCodes;
         }
 
         private async Task TrackRequest(HttpContext httpContext, Exclude attributeExcludeFilter, StatusCodeRange[] attributeTrackedStatusCodes)
         {
-            var stopwatch = Stopwatch.StartNew();
+            var duration = DurationMeasurement.Start();
+
             bool includeRequestBody = ShouldIncludeRequestBody(attributeExcludeFilter);
             bool includeResponseBody = ShouldIncludeResponseBody(attributeExcludeFilter);
-            
+
             string requestBody = await GetPotentialRequestBodyAsync(httpContext, includeRequestBody);
 
             // Response body doesn't support (built-in) buffering and is not seekable, so we're storing temporary the response stream in our own seekable stream,
@@ -177,8 +179,7 @@ namespace Arcus.POC.WebApi.Logging
                     {
                         string responseBody = await GetPotentialResponseBodyAsync(httpContext, includeResponseBody);
 
-                        stopwatch.Stop();
-                        LogRequest(requestBody, responseBody, httpContext, stopwatch.Elapsed); 
+                        LogRequest(requestBody, responseBody, httpContext, duration.StartTime, duration.Elapsed);
                     }
 
                     if (includeResponseBody)
@@ -196,9 +197,9 @@ namespace Arcus.POC.WebApi.Logging
             bool includeRequestBody = _options.IncludeRequestBody && attributeExcludeFilter.HasFlag(Exclude.RequestBody) == false;
             if (includeRequestBody)
             {
-                _logger.LogTrace("Request tracking will include the request's body as the options '{OptionName}' = '{OptionValue}' and the '{Attribute}' doesn't exclude the request body", nameof(_options.IncludeRequestBody), _options.IncludeRequestBody, nameof(RequestTrackingAttribute));   
+                _logger.LogTrace("Request tracking will include the request's body as the options '{OptionName}' = '{OptionValue}' and the '{Attribute}' doesn't exclude the request body", nameof(_options.IncludeRequestBody), _options.IncludeRequestBody, nameof(RequestTrackingAttribute));
             }
-            
+
             return includeRequestBody;
         }
 
@@ -207,7 +208,7 @@ namespace Arcus.POC.WebApi.Logging
             bool includeResponseBody = _options.IncludeResponseBody && attributeExcludeFilter.HasFlag(Exclude.ResponseBody) == false;
             if (includeResponseBody)
             {
-                _logger.LogTrace("Request tracking will include the response's body as the options '{OptionName}' = '{OptionValue}' and the '{Attribute}' doesn't exclude the response body", nameof(_options.IncludeResponseBody), _options.IncludeResponseBody, nameof(RequestTrackingAttribute));   
+                _logger.LogTrace("Request tracking will include the response's body as the options '{OptionName}' = '{OptionValue}' and the '{Attribute}' doesn't exclude the response body", nameof(_options.IncludeResponseBody), _options.IncludeResponseBody, nameof(RequestTrackingAttribute));
             }
 
             return includeResponseBody;
@@ -224,7 +225,7 @@ namespace Arcus.POC.WebApi.Logging
             return Stream.Null;
         }
 
-        private void LogRequest(string requestBody, string responseBody, HttpContext httpContext, TimeSpan duration)
+        private void LogRequest(string requestBody, string responseBody, HttpContext httpContext, DateTimeOffset requestTime, TimeSpan duration)
         {
             try
             {
@@ -242,7 +243,7 @@ namespace Arcus.POC.WebApi.Logging
                 }
 
                 Dictionary<string, object> logContext = telemetryContext.ToDictionary(kv => kv.Key, kv => (object)kv.Value);
-                _logger.LogHttpRequest(httpContext.Request, httpContext.Response, duration, logContext);
+                _logger.LogHttpRequest(httpContext.Request, httpContext.Response, requestTime, duration, logContext);
             }
             catch (Exception exception)
             {
@@ -275,7 +276,7 @@ namespace Arcus.POC.WebApi.Logging
             if (includeRequestBody)
             {
                 httpContext.Request.EnableBuffering();
-                
+
                 string sanitizedBody = await GetBodyAsync(httpContext.Request.Body, _options.RequestBodyBufferSize, "Request");
                 return sanitizedBody;
             }
@@ -290,27 +291,27 @@ namespace Arcus.POC.WebApi.Logging
                 string sanitizedBody = await GetBodyAsync(httpContext.Response.Body, _options.ResponseBodyBufferSize, "Response");
                 return sanitizedBody;
             }
-            
+
             return null;
         }
 
         private bool AllowedToTrackStatusCode(HttpContext httpContext, IEnumerable<StatusCodeRange> attributeTrackedStatusCodes)
         {
-            IEnumerable<HttpStatusCode> optionsTrackedStatusCodes = 
+            IEnumerable<HttpStatusCode> optionsTrackedStatusCodes =
                 _options.TrackedStatusCodes ?? Enumerable.Empty<HttpStatusCode>();
 
             IEnumerable<StatusCodeRange> optionsTrackedStatusCodeRanges =
                 _options.TrackedStatusCodeRanges ?? Enumerable.Empty<StatusCodeRange>();
-            
-            StatusCodeRange[] combinedStatusCodeRanges = 
+
+            StatusCodeRange[] combinedStatusCodeRanges =
                 optionsTrackedStatusCodes
-                    .Select(code => new StatusCodeRange((int) code))
+                    .Select(code => new StatusCodeRange((int)code))
                     .Concat(optionsTrackedStatusCodeRanges)
                     .Concat(attributeTrackedStatusCodes)
                     .Where(range => range != null)
                     .Distinct().ToArray();
 
-            bool allowedToTrackStatusCode = 
+            bool allowedToTrackStatusCode =
                 combinedStatusCodeRanges.Length <= 0
                 || combinedStatusCodeRanges.Any(range => range.IsWithinRange(httpContext.Response.StatusCode));
 
@@ -323,7 +324,7 @@ namespace Arcus.POC.WebApi.Logging
             {
                 _logger.LogTrace("Request tracking for this endpoint is disallowed as the response status code '{ResponseStatusCode}' is not within the allowed tracked status code ranges '{TrackedStatusCodes}'", httpContext.Response.StatusCode, formattedStatusCodes);
             }
-            
+
             return allowedToTrackStatusCode;
         }
 
@@ -336,7 +337,7 @@ namespace Arcus.POC.WebApi.Logging
                 _logger.LogTrace("Found {Target} body to be tracked", target);
                 return sanitizedBody;
             }
-                
+
             _logger.LogWarning("No {Target} body was found to be tracked", target);
             return null;
         }
@@ -378,7 +379,7 @@ namespace Arcus.POC.WebApi.Logging
                 {
                     var buffer = new char[maxLength.Value];
                     await reader.ReadBlockAsync(buffer, 0, buffer.Length);
-                    contents = new String(buffer); 
+                    contents = new String(buffer);
                 }
                 else
                 {
