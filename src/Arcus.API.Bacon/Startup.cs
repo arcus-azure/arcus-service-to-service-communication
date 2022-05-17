@@ -38,7 +38,7 @@ namespace Arcus.API.Bacon
             });
             
             services.AddHealthChecks();
-            services.AddCustomHttpCorrelation(options => options.UpstreamService.ExtractFromRequest = true);
+            services.AddHttpCorrelation(options => options.UpstreamService.ExtractFromRequest = true);
 
             services.AddScoped<IBaconRepository, BaconRepository>();
 
@@ -48,10 +48,11 @@ namespace Arcus.API.Bacon
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCustomExceptionHandling();
-            app.UseCustomHttpCorrelation();
+            app.UseExceptionHandling();
+            app.UseHttpCorrelation();
             app.UseRouting();
-            app.UseCustomRequestTracking();
+            
+            app.UseRequestTracking(configureOptions: o => { });
 
             ExposeOpenApiDocs(ApiName, app);
         }

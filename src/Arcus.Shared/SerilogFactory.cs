@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog;
-using Serilog.Configuration;
 using Serilog.Events;
 using System;
 using Arcus.Custom;
+using Arcus.Shared.Logging.Correlation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace Arcus.Shared
 {
@@ -23,7 +26,9 @@ namespace Arcus.Shared
 
             if (useHttpCorrelation)
             {
-                loggerConfiguration = loggerConfiguration.Enrich.WithCustomHttpCorrelationInfo(serviceProvider);
+                var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+
+                loggerConfiguration = loggerConfiguration.Enrich.WithCorrelationInfo(new CustomHttpCorrelationInfoAccessor(httpContextAccessor));
             }
             else
             {
