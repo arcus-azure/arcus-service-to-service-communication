@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Arcus.API.Market.Repositories.Interfaces;
 using Arcus.Observability.Correlation;
 using Arcus.Observability.Telemetry.Core;
-using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using Arcus.Shared.Messages;
 using GuardNet;
 using Microsoft.Azure.ServiceBus;
@@ -55,7 +54,7 @@ namespace Arcus.API.Market.Repositories
                     // TODO: Support linking as well
                     var serviceBusEndpoint = _queueClient.ServiceBusConnection.Endpoint.ToString();
                     _logger.LogInformation($"Done sending at {DateTimeOffset.UtcNow}");
-                    _logger.LogExtendedServiceBusQueueDependency(serviceBusEndpoint, _queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
+                    _logger.LogServiceBusQueueDependency(_queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
                 }                
             }
         }

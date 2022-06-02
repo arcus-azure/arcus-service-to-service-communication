@@ -2,11 +2,10 @@
 using Serilog;
 using Serilog.Events;
 using System;
-using Arcus.Custom;
 using Arcus.Shared.Logging.Correlation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-
+using Serilog.Configuration;
 
 namespace Arcus.Shared
 {
@@ -36,7 +35,7 @@ namespace Arcus.Shared
             }
 
             loggerConfiguration = loggerConfiguration.WriteTo.Console()
-                .WriteTo.CustomAzureApplicationInsights(instrumentationKey);
+                                                     .WriteTo.AzureApplicationInsightsWithInstrumentationKey(instrumentationKey);                                                  
         }
     }
 }
