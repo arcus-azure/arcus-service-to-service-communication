@@ -1,8 +1,9 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Arcus.POC.Messaging.Abstractions;
-using Arcus.POC.Messaging.Pumps.ServiceBus;
+using Arcus.Messaging.Abstractions;
+using Arcus.Messaging.Abstractions.ServiceBus;
+using Arcus.Messaging.Abstractions.ServiceBus.MessageHandling;
 using Arcus.Shared.Messages;
 using Arcus.Shared.Services.Interfaces;
 using Microsoft.Extensions.Logging;

@@ -18,11 +18,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Arcus.POC.Messaging.Abstractions\Arcus.POC.Messaging.Abstractions.csproj" />
-    <ProjectReference Include="..\Arcus.POC.Messaging.Pumps.Abstractions\Arcus.POC.Messaging.Pumps.Abstractions.csproj" />
-    <ProjectReference Include="..\Arcus.POC.Messaging.Pumps.ServiceBus\Arcus.POC.Messaging.Pumps.ServiceBus.csproj" />
-    <ProjectReference Include="..\Arcus.POC.Messaging.ServiceBus.Core\Arcus.POC.Messaging.ServiceBus.Core.csproj" />
-  </ItemGroup>
-
 </Project>

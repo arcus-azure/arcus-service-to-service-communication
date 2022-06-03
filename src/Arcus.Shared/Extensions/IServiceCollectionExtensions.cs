@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
             // TODO: Contribute Upstream - HTTP service-to-service automagical tracking - Option #1 - Use HTTP pipeline, if we can fix the DI scoping for all scenarios
             // TODO: Remove name requirement as this is an extension workaround
             // https://thomaslevesque.com/2016/12/08/fun-with-the-httpclient-pipeline/
-            //services.AddTransient<DependencyTrackingHttpHandler>();
+            // services.AddTransient<DependencyTrackingHttpHandler>();
             //services.AddHttpClient("SomeName")
                       //.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredService<DependencyTrackingHttpHandler>());
 
