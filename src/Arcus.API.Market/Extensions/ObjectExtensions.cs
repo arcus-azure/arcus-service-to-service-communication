@@ -1,12 +1,12 @@
 ﻿using Azure.Messaging.ServiceBus;
 using GuardNet;
 using Newtonsoft.Json;
+using System;
 using System.Text;
 
 namespace Arcus.API.Market.Extensions
 {
-    // TODO: Arcus should provide this functionality, but it is not a good idea to create this
-    //       as an extension method on object.
+    [Obsolete("Use Arcus.ServiceBusMessageBuilder instead")]
     public static class ObjectExtensions
     {
         private const string JsonContentType = "application/json";

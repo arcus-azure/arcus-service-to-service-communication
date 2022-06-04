@@ -9,6 +9,7 @@ using GuardNet;
 using Microsoft.Extensions.Logging;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Azure;
+using Microsoft.Azure.ServiceBus;
 
 namespace Arcus.API.Market.Repositories
 {
@@ -46,7 +47,11 @@ namespace Arcus.API.Market.Repositories
 
                 try
                 {
-                    var serviceBusMessage = orderRequest.AsServiceBusMessage(operationId: correlationInfo?.OperationId, transactionId: correlationInfo?.TransactionId, operationParentId: upstreamOperationParentId);
+                    var serviceBusMessage = ServiceBusMessageBuilder.CreateForBody(orderRequest)
+                                                .WithOperationId(correlationInfo?.OperationId)
+                                                .WithTransactionId(correlationInfo?.TransactionId)
+                                                .WithOperationParentId(upstreamOperationParentId)
+                                                .Build();
 
                     await _serviceBusOrderSender.SendMessageAsync(serviceBusMessage);
 
