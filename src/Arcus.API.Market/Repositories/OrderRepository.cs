@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Arcus.API.Market.Extensions;
 using Arcus.API.Market.Repositories.Interfaces;
 using Arcus.Observability.Correlation;
 using Arcus.Observability.Telemetry.Core;
-using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using Arcus.Shared.Messages;
 using GuardNet;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
+using Azure.Messaging.ServiceBus;
+using Microsoft.Extensions.Azure;
+using Microsoft.Azure.ServiceBus;
 
 namespace Arcus.API.Market.Repositories
 {
@@ -15,16 +17,17 @@ namespace Arcus.API.Market.Repositories
     {
         private readonly ICorrelationInfoAccessor _correlationInfoAccessor;
         private readonly ILogger<OrderRepository> _logger;
-        private readonly QueueClient _queueClient;
+        private readonly ServiceBusSender _serviceBusOrderSender;
 
-        public OrderRepository(QueueClient queueClient, ICorrelationInfoAccessor correlationInfoAccessor, ILogger<OrderRepository> logger)
+        public OrderRepository(IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, ICorrelationInfoAccessor correlationInfoAccessor, ILogger<OrderRepository> logger)
         {
             Guard.NotNull(correlationInfoAccessor, nameof(correlationInfoAccessor));
-            Guard.NotNull(queueClient, nameof(queueClient));
+            Guard.NotNull(serviceBusClientFactory, nameof(serviceBusClientFactory));
             Guard.NotNull(logger, nameof(logger));
 
             _correlationInfoAccessor = correlationInfoAccessor;
-            _queueClient = queueClient;
+            var client = serviceBusClientFactory.CreateClient("orderclient");
+            _serviceBusOrderSender = client.CreateSender("orders");
             _logger = logger;
         }
 
@@ -44,19 +47,23 @@ namespace Arcus.API.Market.Repositories
 
                 try
                 {
-                    var serviceBusMessage = orderRequest.AsServiceBusMessage(operationId: correlationInfo?.OperationId, transactionId: correlationInfo?.TransactionId, operationParentId: upstreamOperationParentId);
-                    
-                    await _queueClient.SendAsync(serviceBusMessage);
+                    var serviceBusMessage = ServiceBusMessageBuilder.CreateForBody(orderRequest)
+                                                .WithOperationId(correlationInfo?.OperationId)
+                                                .WithTransactionId(correlationInfo?.TransactionId)
+                                                .WithOperationParentId(upstreamOperationParentId)
+                                                .Build();
+
+                    await _serviceBusOrderSender.SendMessageAsync(serviceBusMessage);
 
                     isSuccessful = true;
                 }
                 finally
                 {
                     // TODO: Support linking as well
-                    var serviceBusEndpoint = _queueClient.ServiceBusConnection.Endpoint.ToString();
+                    var serviceBusEndpoint = _serviceBusOrderSender.FullyQualifiedNamespace;
                     _logger.LogInformation($"Done sending at {DateTimeOffset.UtcNow}");
-                    _logger.LogExtendedServiceBusQueueDependency(serviceBusEndpoint, _queueClient.QueueName, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
-                }                
+                    _logger.LogServiceBusQueueDependency(_serviceBusOrderSender.EntityPath, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
+                }
             }
         }
     }

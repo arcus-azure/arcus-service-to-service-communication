@@ -20,6 +20,7 @@ namespace Arcus.POC.WebApi.Logging
     /// <summary>
     /// Request tracing middleware component to log every incoming HTTP request.
     /// </summary>
+    [Obsolete("Use Arcus RequestTracking instead")]
     public class CustomRequestTrackingMiddleware
     {
         private readonly RequestTrackingOptions _options;

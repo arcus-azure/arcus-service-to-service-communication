@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Arcus.Observability.Correlation;
 using Arcus.Observability.Telemetry.Core;
-using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
 using Arcus.Shared.Services;
 using Arcus.Shared.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -21,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
             // TODO: Contribute Upstream - HTTP service-to-service automagical tracking - Option #1 - Use HTTP pipeline, if we can fix the DI scoping for all scenarios
             // TODO: Remove name requirement as this is an extension workaround
             // https://thomaslevesque.com/2016/12/08/fun-with-the-httpclient-pipeline/
-            //services.AddTransient<DependencyTrackingHttpHandler>();
+            // services.AddTransient<DependencyTrackingHttpHandler>();
             //services.AddHttpClient("SomeName")
                       //.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredService<DependencyTrackingHttpHandler>());
 
@@ -55,7 +54,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 var response = await base.SendAsync(request, cancellationToken);
 
-                _logger.LogExtendedHttpDependency(request, response.StatusCode, httpDependencyMeasurement, dependencyId: upstreamOperationParentId);
+                _logger.LogHttpDependency(request, response.StatusCode, httpDependencyMeasurement, dependencyId: upstreamOperationParentId);
 
                 return response;
             }

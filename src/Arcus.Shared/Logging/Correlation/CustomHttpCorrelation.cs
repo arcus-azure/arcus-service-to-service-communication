@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Arcus.Observability.Correlation;
-using Arcus.POC.WebApi.Logging.Core.Correlation;
 using GuardNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 
 // ReSharper disable once CheckNamespace
-namespace Arcus.WebApi.Logging.Correlation
+namespace Arcus.Shared.Logging.Correlation
 {
     /// <summary>
     /// Provides the functionality to correlate HTTP requests and responses according to configured <see cref="CorrelationInfoOptions"/>,

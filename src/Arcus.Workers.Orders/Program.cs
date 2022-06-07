@@ -1,5 +1,4 @@
 ﻿using System;
-using Arcus.POC.Messaging.Abstractions;
 using Arcus.Shared;
 using Arcus.Shared.Messages;
 using Arcus.Workers.Orders.MessageHandlers;

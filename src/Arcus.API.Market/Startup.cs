@@ -1,9 +1,10 @@
 using Arcus.API.Market.Repositories;
 using Arcus.API.Market.Repositories.Interfaces;
 using Arcus.Shared;
+using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Azure.ServiceBus;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -38,13 +39,13 @@ namespace Arcus.API.Market
             });
 
             services.AddHealthChecks();
-            services.AddCustomHttpCorrelation(options => options.UpstreamService.ExtractFromRequest = true);
+            services.AddHttpCorrelation(options => options.UpstreamService.ExtractFromRequest = true);
 
             services.AddBaconApiIntegration();
-            services.AddScoped<QueueClient>(serviceProvider =>
+            services.AddAzureClients(options => 
             {
                 var serviceBusConnectionString = Configuration["SERVICEBUS_CONNECTIONSTRING"];
-                return new QueueClient(serviceBusConnectionString, "orders");
+                options.AddServiceBusClient(serviceBusConnectionString);
             });
             services.AddScoped<IOrderRepository, OrderRepository>();
 
@@ -54,10 +55,10 @@ namespace Arcus.API.Market
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCustomExceptionHandling();
-            app.UseCustomHttpCorrelation();
+            app.UseExceptionHandling();
+            app.UseHttpCorrelation();
             app.UseRouting();
-            app.UseCustomRequestTracking();
+            app.UseRequestTracking();
 
             ExposeOpenApiDocs(ApiName, app);
         }

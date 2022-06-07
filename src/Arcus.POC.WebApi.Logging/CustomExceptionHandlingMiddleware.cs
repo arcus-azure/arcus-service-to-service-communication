@@ -12,6 +12,7 @@ namespace Arcus.POC.WebApi.Logging
     /// <summary>
     /// Exception handling middleware that handles exceptions thrown further up the ASP.NET Core request pipeline.
     /// </summary>
+    [Obsolete("Use Arcus ExceptionHandling Middleware instead")]
     public class CustomExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;

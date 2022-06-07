@@ -26,6 +26,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
         /// <exception cref="ArgumentException">
         ///     Thrown when the <paramref name="request"/> doesn't have a request URI or HTTP method, the <paramref name="statusCode"/> is outside the bounds of the enumeration.
         /// </exception>
+        [Obsolete("Use the LogHttpDependency method from Arcus instead")]
         public static void LogExtendedHttpDependency(
             this ILogger logger,
             HttpRequestMessage request,
@@ -90,7 +91,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             string dependencyName = $"{requestMethod} {requestUri.AbsolutePath}";
             bool isSuccessful = (int)statusCode >= 200 && (int)statusCode < 300;
 
-            logger.LogWarning(HttpDependencyFormat, new ExtendedDependencyLogEntry(
+            logger.LogWarning(HttpDependencyFormat, new DependencyLogEntry(
                 dependencyType: "Http",
                 dependencyId: dependencyId,
                 dependencyName: dependencyName,
@@ -103,6 +104,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
                 context: context));
         }
 
+        [Obsolete("Use official LogServiceBusQueueDependency instead")]
         public static void LogExtendedServiceBusQueueDependency(
             this ILogger logger,
             string serviceBusNamespaceEndpoint,
@@ -150,6 +152,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
             LogExtendedServiceBusDependency(logger, target, dependencyId, isSuccessful, startTime, duration, ServiceBusEntityType.Queue, context);
         }
 
+        [Obsolete("Use official Arcus LogServiceBusDependency instead")]
         public static void LogExtendedServiceBusDependency(
             this ILogger logger,
             string target,
@@ -375,6 +378,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Ex
     /// <summary>
     /// Represents a custom dependency as a logging entry.
     /// </summary>
+    [Obsolete("Use the official Arcus DependencyLogEntry class instead")]
     public class ExtendedDependencyLogEntry
     {
         /// <summary>

@@ -12,6 +12,7 @@ namespace Arcus.Custom
     /// <summary>
     /// Extensions on the <see cref="LoggerSinkConfiguration"/> class to add the Azure Application Insights as a Serilog sink.
     /// </summary>
+    [Obsolete("Use builtin Arcus functionality instead")]
     public static class LoggerSinkConfigurationExtensions
     {
         /// <summary>
