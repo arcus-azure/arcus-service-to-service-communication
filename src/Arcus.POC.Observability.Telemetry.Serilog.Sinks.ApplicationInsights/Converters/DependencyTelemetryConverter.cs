@@ -6,7 +6,7 @@ using GuardNet;
 using Microsoft.ApplicationInsights.DataContracts;
 using Serilog.Events;
 
-namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
+namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
 {
     /// <summary>
     /// Represents a conversion from a Serilog <see cref="LogEvent"/> to an <see cref="DependencyTelemetry"/> instance.
@@ -25,6 +25,7 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             Guard.NotNull(logEvent.Properties, nameof(logEvent), "Requires a Serilog event with a set of properties to create an Azure Application Insights Dependency telemetry instance");
 
             StructureValue logEntry = logEvent.Properties.GetAsStructureValue(ContextProperties.DependencyTracking.DependencyLogEntry);
+            string dependencyId = logEntry.Properties.GetAsRawString(nameof(DependencyLogEntry.DependencyId));
             string dependencyType = logEntry.Properties.GetAsRawString(nameof(DependencyLogEntry.DependencyType));
             string dependencyName = logEntry.Properties.GetAsRawString(nameof(DependencyLogEntry.DependencyName));
             string target = logEntry.Properties.GetAsRawString(nameof(DependencyLogEntry.TargetName));
@@ -34,17 +35,10 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             string resultCode = logEntry.Properties.GetAsRawString(nameof(DependencyLogEntry.ResultCode));
             bool outcome = logEntry.Properties.GetAsBool(nameof(DependencyLogEntry.IsSuccessful));
             IDictionary<string, string> context = logEntry.Properties.GetAsDictionary(nameof(DependencyLogEntry.Context));
-            
-            // TODO: Check if this works
-            string dependencyId = logEntry.Properties.GetAsRawString("DependencyId");
-            
-            // TODO: Remove this as this is a fallback for older extensions
-            dependencyId = string.IsNullOrWhiteSpace(dependencyId) ? Guid.NewGuid().ToString() : dependencyId;
 
-            // TODO: Assign a new id for the dependency itself and return it when calling logdependency
             var dependencyTelemetry = new DependencyTelemetry(dependencyType, target, dependencyName, data, startTime, duration, resultCode, success: outcome)
             {
-                Id = dependencyId
+                Id = dependencyId ?? $"generated-{Guid.NewGuid()}"
             };
 
             dependencyTelemetry.Properties.AddRange(context);

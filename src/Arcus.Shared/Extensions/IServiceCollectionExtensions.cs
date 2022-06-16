@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddHttpClient();
 
             // TODO: Contribute Upstream - HTTP service-to-service automagical tracking - Option #1 - Use HTTP pipeline, if we can fix the DI scoping for all scenarios
-            // TODO: Remove name requirement as this is an extension workaround
+            // Remove name requirement as this is an extension workaround
             // https://thomaslevesque.com/2016/12/08/fun-with-the-httpclient-pipeline/
             // services.AddTransient<DependencyTrackingHttpHandler>();
             //services.AddHttpClient("SomeName")
@@ -45,7 +45,6 @@ namespace Microsoft.Extensions.DependencyInjection
             using (var httpDependencyMeasurement = DurationMeasurement.Start())
             {
                 var newDependencyId = Guid.NewGuid().ToString();
-                // TODO: Fix DI scoping issue here again, doesn't work for messaging
                 var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
                 var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
 

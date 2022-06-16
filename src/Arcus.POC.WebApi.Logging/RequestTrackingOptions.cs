@@ -4,10 +4,10 @@ using System.Collections.ObjectModel;
 using System.Net;
 using GuardNet;
 
-namespace Arcus.POC.WebApi.Logging
+namespace Arcus.WebApi.Logging
 {
     /// <summary>
-    /// Options that control the behavior in the <see cref="CustomRequestTrackingMiddleware"/>.
+    /// Options that control the behavior in the <see cref="RequestTrackingMiddleware"/>.
     /// </summary>
     public class RequestTrackingOptions
     {

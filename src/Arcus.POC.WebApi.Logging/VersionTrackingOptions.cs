@@ -1,9 +1,9 @@
 ﻿using GuardNet;
 
-namespace Arcus.POC.WebApi.Logging
+namespace Arcus.WebApi.Logging
 {
     /// <summary>
-    /// Represents the user-configurable options to control how the <see cref="CustomVersionTrackingMiddleware"/> should track the current application version in the response.
+    /// Represents the user-configurable options to control how the <see cref="VersionTrackingMiddleware"/> should track the current application version in the response.
     /// </summary>
     public class VersionTrackingOptions
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using GuardNet;
 
-namespace Arcus.POC.WebApi.Logging
+namespace Arcus.WebApi.Logging
 {
     /// <summary>
     /// Represents a HTTP status code range with a minimum and maximum threshold.

@@ -2,8 +2,9 @@
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
+using System;
 
-namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
+namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
 {
     /// <summary>
     /// Represents a conversion from the Operation-related logging information to the Application Insights <see cref="OperationContext"/> instance.
@@ -21,41 +22,71 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
                 return;
             }
 
-            if (telemetryEntry.Properties.TryGetValue(ContextProperties.Correlation.OperationId, out string operationId))
+            // TODO: custom request telemetry assignment
+            if (telemetryEntry is RequestTelemetry requestTelemetry)
             {
-                telemetryEntry.Context.Operation.Id = operationId;
+                if (telemetryEntry.Properties.TryGetValue(ContextProperties.Correlation.OperationId, out string operationId))
+                {
+                    requestTelemetry.Id = operationId ?? $"generated-{Guid.NewGuid()}";
+                }
+
+                if (telemetryEntry.Properties.TryGetValue(ContextProperties.Correlation.TransactionId, out string transactionId))
+                {
+                    telemetryEntry.Context.Operation.Id = transactionId;
+                }
+
+                if (telemetryEntry.Properties.TryGetValue(ContextProperties.Correlation.OperationParentId, out string operationParentId))
+                {
+                    telemetryEntry.Context.Operation.ParentId = operationParentId;
+                }
+            }
+            else
+            {
+                if (telemetryEntry.Properties.TryGetValue(ContextProperties.Correlation.TransactionId, out string transactionId))
+                {
+                    telemetryEntry.Context.Operation.Id = transactionId;
+                }
+
+                if (telemetryEntry.Properties.TryGetValue(ContextProperties.Correlation.OperationId, out string operationId))
+                {
+                    telemetryEntry.Context.Operation.ParentId = operationId;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enrich the given <paramref name="telemetryEntry"/> with the operation name.
+        /// </summary>
+        /// <param name="telemetryEntry">The telemetry instance to enrich.</param>
+        public void EnrichWithOperationName<TEntry>(TEntry telemetryEntry) where TEntry : ITelemetry, ISupportProperties
+        {
+            if (telemetryEntry is RequestTelemetry requestTelemetry)
+            {
+                // Check if operation has already been set with a custom value in the RequestTelemetryConverter, if not use the request name
+                if (String.IsNullOrEmpty(requestTelemetry.Context.Operation.Name))
+                {
+                    requestTelemetry.Context.Operation.Name = requestTelemetry.Name;
+                }
             }
 
-            if (telemetryEntry.Properties.TryGetValue(ContextProperties.Correlation.OperationParentId, out string operationParentId))
+            if (telemetryEntry is DependencyTelemetry dependencyTelemetry)
             {
-                telemetryEntry.Context.Operation.ParentId = operationParentId;
+                dependencyTelemetry.Context.Operation.Name = dependencyTelemetry.Name;
             }
 
-            // TODO: Contribute Upstream
-            // This gives the operation a nice name to provide structure in the performance overview
-            if (telemetryEntry is RequestTelemetry f)
+            if (telemetryEntry is EventTelemetry eventTelemetry)
             {
-                f.Context.Operation.Name = f.Name;
+                eventTelemetry.Context.Operation.Name = eventTelemetry.Name;
             }
 
-            if (telemetryEntry is DependencyTelemetry d)
+            if (telemetryEntry is AvailabilityTelemetry availabilityTelemetry)
             {
-                d.Context.Operation.Name = d.Name;
+                availabilityTelemetry.Context.Operation.Name = availabilityTelemetry.Name;
             }
 
-            if (telemetryEntry is EventTelemetry e)
+            if (telemetryEntry is MetricTelemetry metricTelemetry)
             {
-                e.Context.Operation.Name = e.Name;
-            }
-
-            if (telemetryEntry is AvailabilityTelemetry a)
-            {
-                a.Context.Operation.Name = a.Name;
-            }
-
-            if (telemetryEntry is MetricTelemetry m)
-            {
-                m.Context.Operation.Name = m.Name;
+                metricTelemetry.Context.Operation.Name = metricTelemetry.Name;
             }
         }
     }

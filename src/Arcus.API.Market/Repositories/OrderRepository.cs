@@ -26,7 +26,7 @@ namespace Arcus.API.Market.Repositories
             Guard.NotNull(logger, nameof(logger));
 
             _correlationInfoAccessor = correlationInfoAccessor;
-            var client = serviceBusClientFactory.CreateClient("orderclient");
+            var client = serviceBusClientFactory.CreateClient("Default");
             _serviceBusOrderSender = client.CreateSender("orders");
             _logger = logger;
         }
@@ -42,16 +42,16 @@ namespace Arcus.API.Market.Repositories
             {
                 bool isSuccessful = false;
                 var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
+                var newOperationId = $"operation-{Guid.NewGuid()}";
                 var newDependencyId = Guid.NewGuid().ToString();
-                var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
-
+                
                 try
                 {
                     var serviceBusMessage = ServiceBusMessageBuilder.CreateForBody(orderRequest)
-                                                .WithOperationId(correlationInfo?.OperationId)
-                                                .WithTransactionId(correlationInfo?.TransactionId)
-                                                .WithOperationParentId(upstreamOperationParentId)
-                                                .Build();
+                                                                    .WithOperationId(newOperationId)
+                                                                    .WithTransactionId(correlationInfo?.TransactionId)
+                                                                    .WithOperationParentId(newDependencyId)
+                                                                    .Build();
 
                     await _serviceBusOrderSender.SendMessageAsync(serviceBusMessage);
 
@@ -59,10 +59,9 @@ namespace Arcus.API.Market.Repositories
                 }
                 finally
                 {
-                    // TODO: Support linking as well
                     var serviceBusEndpoint = _serviceBusOrderSender.FullyQualifiedNamespace;
                     _logger.LogInformation($"Done sending at {DateTimeOffset.UtcNow}");
-                    _logger.LogServiceBusQueueDependency(_serviceBusOrderSender.EntityPath, isSuccessful, serviceBusDependencyMeasurement, dependencyId: upstreamOperationParentId);
+                    _logger.LogServiceBusQueueDependency(_serviceBusOrderSender.EntityPath, isSuccessful, serviceBusDependencyMeasurement, dependencyId: newDependencyId);
                 }
             }
         }

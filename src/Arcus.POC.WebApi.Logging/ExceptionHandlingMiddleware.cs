@@ -1,50 +1,48 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using GuardNet;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Logging;
+using GuardNet;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Arcus.POC.WebApi.Logging
+namespace Arcus.WebApi.Logging
 {
     /// <summary>
     /// Exception handling middleware that handles exceptions thrown further up the ASP.NET Core request pipeline.
     /// </summary>
-    [Obsolete("Use Arcus ExceptionHandling Middleware instead")]
-    public class CustomExceptionHandlingMiddleware
+    public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly Func<string> _getLoggingCategory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomExceptionHandlingMiddleware"/> class.
+        /// Initializes a new instance of the <see cref="ExceptionHandlingMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next <see cref="RequestDelegate"/> in the ASP.NET Core request pipeline.</param>
         /// <exception cref="ArgumentNullException">When the <paramref name="next"/> is <c>null</c>.</exception>
-        public CustomExceptionHandlingMiddleware(RequestDelegate next)
+        public ExceptionHandlingMiddleware(RequestDelegate next)
             : this(next, categoryName: String.Empty)
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomExceptionHandlingMiddleware"/> class.
+        /// Initializes a new instance of the <see cref="ExceptionHandlingMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next <see cref="RequestDelegate"/> in the ASP.NET Core request pipeline.</param>
         /// <param name="categoryName">The category-name for messages produced by the logger.</param>
         /// <exception cref="ArgumentNullException">When the <paramref name="next"/> is <c>null</c>.</exception>
-        public CustomExceptionHandlingMiddleware(RequestDelegate next, string categoryName)
+        public ExceptionHandlingMiddleware(RequestDelegate next, string categoryName)
             : this(next, getLoggingCategory: () => categoryName)
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomExceptionHandlingMiddleware"/> class.
+        /// Initializes a new instance of the <see cref="ExceptionHandlingMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next <see cref="RequestDelegate"/> in the ASP.NET Core request pipeline.</param>
         /// <param name="getLoggingCategory">The function that returns the category-name that must be used by the logger when writing log messages.</param>
         /// <exception cref="ArgumentNullException">When the <paramref name="next"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentNullException">When the <paramref name="getLoggingCategory"/> is <c>null</c>.</exception>
-        public CustomExceptionHandlingMiddleware(RequestDelegate next, Func<string> getLoggingCategory)
+        public ExceptionHandlingMiddleware(RequestDelegate next, Func<string> getLoggingCategory)
         {
             Guard.NotNull(next, nameof(next), "The next request delegate in the application request pipeline cannot be null");
             Guard.NotNull(getLoggingCategory, nameof(getLoggingCategory), "The retrieval of the logging category function cannot be null");
@@ -64,7 +62,11 @@ namespace Arcus.POC.WebApi.Logging
             {
                 await _next(context);
             }
-            catch (BadHttpRequestException ex)
+#if NET6_0
+            catch (Microsoft.AspNetCore.Http.BadHttpRequestException ex) 
+#else
+            catch (Microsoft.AspNetCore.Server.Kestrel.Core.BadHttpRequestException ex) 
+#endif
             {
                 // Catching the `BadHttpRequestException` and using the `.StatusCode` property allows us to interact with the built-in ASP.NET components.
                 // When the Kestrel maximum request body restriction is exceeded, for example, this kind of exception is thrown.

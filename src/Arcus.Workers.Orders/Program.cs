@@ -1,10 +1,12 @@
 ﻿using System;
+using Arcus.Messaging.Abstractions.ServiceBus.MessageHandling;
 using Arcus.Shared;
 using Arcus.Shared.Messages;
 using Arcus.Workers.Orders.MessageHandlers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace Arcus.Workers.Orders
@@ -37,10 +39,15 @@ namespace Arcus.Workers.Orders
                        .UseSerilog(DefineLoggerConfiguration)
                        .ConfigureServices((hostContext, services) =>
                        {
-                           // TODO: Fix the correlation retrieval in Bacon service
                            services.AddBaconApiIntegration();
 
-                           // TODO: Import Arcus Messaging to add request tracking
+                           services.AddServiceBusMessageRouting(serviceProvider =>
+                           {
+                               return new CustomAzureServiceBusMessageRouter(serviceProvider,
+                                   new AzureServiceBusMessageRouterOptions(),
+                                   serviceProvider.GetRequiredService<ILogger<AzureServiceBusMessageRouter>>());
+                           });
+
                            services.AddServiceBusQueueMessagePump("orders", secretProvider => secretProvider.GetRawSecretAsync("SERVICEBUS_CONNECTIONSTRING"))
                                    .WithServiceBusMessageHandler<EatBaconRequestMessageHandler, EatBaconRequestMessage>();
                        });

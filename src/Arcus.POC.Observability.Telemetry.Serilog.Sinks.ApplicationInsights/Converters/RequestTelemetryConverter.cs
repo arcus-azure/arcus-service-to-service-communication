@@ -1,18 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using Arcus.Observability.Telemetry.Core;
-using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Extensions;
+using Arcus.Observability.Telemetry.Core.Logging;
+using Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Configuration;
 using GuardNet;
 using Microsoft.ApplicationInsights.DataContracts;
 using Serilog.Events;
 
-namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
+namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
 {
     /// <summary>
     /// Represents a conversion from a Serilog <see cref="LogEvent"/> to an Application Insights <see cref="RequestTelemetry"/> instance.
     /// </summary>
     public class RequestTelemetryConverter : CustomTelemetryConverter<RequestTelemetry>
     {
+        private readonly ApplicationInsightsSinkRequestOptions _options;
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequestTelemetryConverter" /> class.
+        /// </summary>
+        public RequestTelemetryConverter()
+            : this(new ApplicationInsightsSinkRequestOptions())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequestTelemetryConverter" /> class.
+        /// </summary>
+        /// <param name="options">The user-defined configuration options to tracking requests.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="options" /> is <c>null</c>.</exception>
+        public RequestTelemetryConverter(ApplicationInsightsSinkRequestOptions options)
+        {
+            Guard.NotNull(options, nameof(options), "Requires a set of user-configurable options to influence the behavior of how requests are tracked");
+            _options = options;
+        }
+        
         /// <summary>
         ///     Creates a telemetry entry for a given log event
         /// </summary>
@@ -25,54 +47,68 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             Guard.NotNull(logEvent.Properties, nameof(logEvent), "Requires a Serilog event with a set of properties to create an Azure Application Insights Request telemetry instance");
             
             StructureValue logEntry = logEvent.Properties.GetAsStructureValue(ContextProperties.RequestTracking.RequestLogEntry);
-            string requestHost = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.RequestHost));
-            string requestUri = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.RequestUri));
-            string responseStatusCode = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.ResponseStatusCode));
-            TimeSpan requestDuration = logEntry.Properties.GetAsTimeSpan(nameof(ExtendedRequestLogEntry.RequestDuration));
-            DateTimeOffset requestTime = logEntry.Properties.GetAsDateTimeOffset(nameof(ExtendedRequestLogEntry.RequestTime));
-            IDictionary<string, string> context = logEntry.Properties.GetAsDictionary(nameof(ExtendedRequestLogEntry.Context));
-            string sourceSystem = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.SourceSystem));
-            string sourceName = logEntry.Properties.GetAsRawString(nameof(ExtendedRequestLogEntry.SourceName));
+            string requestMethod = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.RequestMethod));
+            string requestHost = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.RequestHost));
+            string requestUri = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.RequestUri));
+            string responseStatusCode = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.ResponseStatusCode));
+            string operationName = logEntry.Properties.GetAsRawString(nameof(RequestLogEntry.OperationName));
+            TimeSpan requestDuration = logEntry.Properties.GetAsTimeSpan(nameof(RequestLogEntry.RequestDuration));
+            DateTimeOffset requestTime = logEntry.Properties.GetAsDateTimeOffset(nameof(RequestLogEntry.RequestTime));
+            IDictionary<string, string> context = logEntry.Properties.GetAsDictionary(nameof(RequestLogEntry.Context));
+            var sourceSystem = logEntry.Properties.GetAsObject<RequestSourceSystem>(nameof(RequestLogEntry.SourceSystem));
 
-            // TODO: Generate this
-            string requestTelemetryId = Guid.NewGuid().ToString();
-            
+            // TODO: request telemetry converter should use the operation ID as telemetry ID.
+
+            string sourceName = DetermineSourceName(sourceSystem, requestMethod, requestUri, operationName);
             bool isSuccessfulRequest = DetermineRequestOutcome(responseStatusCode);
-            
-            var url = DetermineUrl(sourceSystem, requestHost, requestUri);
-            var source = DetermineRequestSource(sourceSystem, sourceName, context);
+            Uri url = DetermineUrl(sourceSystem, requestHost, requestUri);
+            string source = DetermineRequestSource(sourceSystem, context);
+            string requestOperationName = DetermineRequestOperationName(sourceSystem, requestMethod, operationName);
 
             var requestTelemetry = new RequestTelemetry(sourceName, requestTime, requestDuration, responseStatusCode, isSuccessfulRequest)
             {
-                Id = requestTelemetryId,
                 Url = url,
-                Source = source
+                Source = source,
+                Context = { Operation = { Name = requestOperationName } }
             };
 
             requestTelemetry.Properties.AddRange(context);
             return requestTelemetry;
         }
 
-        private string DetermineRequestSource(string sourceSystem, string sourceName, IDictionary<string, string> context)
+        private static string DetermineSourceName(RequestSourceSystem sourceSystem, string requestMethod, string requestUri, string operationName)
         {
-            if (sourceSystem != "Azure Service Bus")
+            if (sourceSystem is RequestSourceSystem.Http)
             {
-                return null;
+                var requestName = $"{requestMethod} {requestUri}";
+                return requestName;
             }
 
-            var entityName = context["ServiceBus-Entity"];
-            var namespaceEndpoint = context["ServiceBus-Endpoint"];
-            return $"type:Azure Service Bus | name:{entityName} | endpoint:sb://{namespaceEndpoint}.servicebus.windows.net/";
+            return operationName;
         }
 
-        private static Uri DetermineUrl(string sourceSystem, string requestHost, string requestUri)
+        private static Uri DetermineUrl(RequestSourceSystem sourceSystem, string requestHost, string requestUri)
         {
-            if (sourceSystem != "HTTP")
+            if (sourceSystem is RequestSourceSystem.Http)
             {
-                return null;
+                var url = new Uri($"{requestHost}{requestUri}");
+                return url;
             }
 
-            return new Uri($"{requestHost}{requestUri}");
+            return null;
+        }
+
+        private static string DetermineRequestSource(RequestSourceSystem sourceSystem, IDictionary<string, string> context)
+        {
+            if (sourceSystem is RequestSourceSystem.AzureServiceBus)
+            {
+                string entityName = context[ContextProperties.RequestTracking.ServiceBus.EntityName];
+                string namespaceEndpoint = context[ContextProperties.RequestTracking.ServiceBus.Endpoint];
+                
+                return $"type:Azure Service Bus | name:{entityName} | endpoint:sb://{namespaceEndpoint}/";
+            }
+
+            return null;
         }
 
         private static bool DetermineRequestOutcome(string rawResponseStatusCode)
@@ -80,6 +116,16 @@ namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Co
             var statusCode = int.Parse(rawResponseStatusCode);
 
             return statusCode >= 200 && statusCode < 300;
+        }
+
+        private static string DetermineRequestOperationName(RequestSourceSystem sourceSystem, string requestMethod, string operationName)
+        {
+            if (sourceSystem is RequestSourceSystem.Http && !operationName.StartsWith(requestMethod))
+            {
+                return $"{requestMethod} {operationName}";
+            }
+
+            return operationName;
         }
     }
 }
