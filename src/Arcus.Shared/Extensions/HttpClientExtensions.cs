@@ -18,7 +18,7 @@ namespace System.Net.Http
                 var newDependencyId = Guid.NewGuid().ToString();
                 var correlationInfo = correlationInfoAccessor.GetCorrelationInfo();
 
-                // TODO: use current operation ID as future parent ID
+                // TODO: use new ID as future parent ID
                 // old:
                 //var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
                 // new:
@@ -45,7 +45,7 @@ namespace System.Net.Http
             {
                 var newDependencyId = Guid.NewGuid().ToString();
 
-                // TODO: use current operation ID as future parent ID
+                // TODO: use new ID as future parent ID
                 // old:
                 //var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
                 // new:

@@ -22,7 +22,9 @@ namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Conver
                 return;
             }
 
-            // TODO: custom request telemetry assignment
+            // TODO: differentiate between request and other types of telemetry:
+            // 1. request telemetry should use operation ID as telemetry ID and
+            // 2. other types should use operation ID as parent ID.
             if (telemetryEntry is RequestTelemetry requestTelemetry)
             {
                 if (telemetryEntry.Properties.TryGetValue(ContextProperties.Correlation.OperationId, out string operationId))

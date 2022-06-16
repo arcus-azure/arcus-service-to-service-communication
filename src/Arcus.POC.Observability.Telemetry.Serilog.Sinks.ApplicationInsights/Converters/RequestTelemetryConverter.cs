@@ -57,8 +57,6 @@ namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Conver
             IDictionary<string, string> context = logEntry.Properties.GetAsDictionary(nameof(RequestLogEntry.Context));
             var sourceSystem = logEntry.Properties.GetAsObject<RequestSourceSystem>(nameof(RequestLogEntry.SourceSystem));
 
-            // TODO: request telemetry converter should use the operation ID as telemetry ID.
-
             string sourceName = DetermineSourceName(sourceSystem, requestMethod, requestUri, operationName);
             bool isSuccessfulRequest = DetermineRequestOutcome(responseStatusCode);
             Uri url = DetermineUrl(sourceSystem, requestHost, requestUri);
