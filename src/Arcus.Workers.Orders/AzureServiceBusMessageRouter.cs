@@ -211,6 +211,7 @@ namespace Arcus.Messaging.Abstractions.ServiceBus.MessageHandling
             {
                 using (IServiceScope serviceScope = ServiceProvider.CreateScope())
                 {
+                    // TODO: enrich message correlation directly instead of via the correlation accessor
                     using (LogContext.Push(new CustomMessageCorrelationInfoEnricher(correlationInfo)))
                     {
                         try
