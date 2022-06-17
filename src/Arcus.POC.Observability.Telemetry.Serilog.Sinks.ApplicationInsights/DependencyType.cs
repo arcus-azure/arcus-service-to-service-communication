@@ -1,6 +1,6 @@
 ﻿using Microsoft.ApplicationInsights.DataContracts;
 
-namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights
+namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights
 {
     /// <summary>
     /// The type of the <see cref="DependencyTelemetry"/> instance.

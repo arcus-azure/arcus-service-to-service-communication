@@ -16,22 +16,30 @@ namespace Serilog.Configuration
     {
         /// <summary>
         /// Adds the <see cref="CorrelationInfoEnricher{TCorrelationInfo}"/> to the logger enrichment configuration which adds the <see cref="CorrelationInfo"/> information
-        /// from the current HTTP context, using the <see cref="CustomHttpCorrelationInfoAccessor"/>.
+        /// from the current HTTP context, using the <see cref="HttpCorrelationInfoAccessor"/>.
         /// </summary>
         /// <param name="enrichmentConfiguration">The configuration to add the enricher.</param>
         /// <param name="serviceProvider">The provider to retrieve the <see cref="IHttpContextAccessor"/> service.</param>
         /// <remarks>
-        ///     In order to use the <see cref="CustomHttpCorrelationInfoAccessor"/>, it first has to be added to the <see cref="IServiceCollection"/>.
+        ///     In order to use the <see cref="HttpCorrelationInfoAccessor"/>, it first has to be added to the <see cref="IServiceCollection"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="enrichmentConfiguration"/> or <paramref name="serviceProvider"/> is <c>null</c>.</exception>
-        public static LoggerConfiguration WithCustomHttpCorrelationInfo(this LoggerEnrichmentConfiguration enrichmentConfiguration, IServiceProvider serviceProvider)
+        public static LoggerConfiguration WithHttpCorrelationInfo(this LoggerEnrichmentConfiguration enrichmentConfiguration, IServiceProvider serviceProvider)
         {
-            Guard.NotNull(enrichmentConfiguration, nameof(enrichmentConfiguration));
-            Guard.NotNull(serviceProvider, nameof(serviceProvider));
+            Guard.NotNull(enrichmentConfiguration, nameof(enrichmentConfiguration), "Requires a Serilog logger enrichment configuration to register the HTTP correlation as enrichment");
+            Guard.NotNull(serviceProvider, nameof(serviceProvider), "Requires a service provider to retrieve the HTTP correlation from the registered services when enriching the Serilog with the HTTP correlation");
 
-            return enrichmentConfiguration.WithCorrelationInfo(
-                new CustomHttpCorrelationInfoAccessor(
-                    serviceProvider.GetRequiredService<IHttpContextAccessor>()));
+            var httpContextAccessor = serviceProvider.GetService<IHttpContextAccessor>();
+            if (httpContextAccessor is null)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot register the HTTP correlation as a Serilog enrichment because no {nameof(IHttpContextAccessor)} was available in the registered services," 
+                    + "please make sure to call 'services.AddHttpCorrelation()' when configuring the services. " 
+                    + "For more information on HTTP correlation, see the official documentation: https://webapi.arcus-azure.net/features/correlation");
+            }
+
+            var correlationInfoAccessor = new HttpCorrelationInfoAccessor(httpContextAccessor);
+            return enrichmentConfiguration.WithCorrelationInfo(correlationInfoAccessor);
         }
     }
 }

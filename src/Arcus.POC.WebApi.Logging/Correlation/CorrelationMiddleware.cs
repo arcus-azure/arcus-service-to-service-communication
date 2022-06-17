@@ -1,30 +1,30 @@
 using System;
 using System.Threading.Tasks;
 using Arcus.Observability.Correlation;
-using Arcus.WebApi.Logging.Correlation;
 using GuardNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Serilog.Configuration;
 
-namespace Arcus.POC.WebApi.Logging.Correlation 
+namespace Arcus.WebApi.Logging.Correlation 
 {
     /// <summary>
     /// Correlate the incoming request with the outgoing response by using previously configured <see cref="CorrelationInfoOptions"/>.
     /// </summary>
-    public class CustomCorrelationMiddleware
+    public class CorrelationMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomCorrelationMiddleware"/> class.
+        /// Initializes a new instance of the <see cref="CorrelationMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next functionality in the request pipeline to be executed.</param>
         /// <param name="logger">The instance to log diagnostic messages during correlation.</param>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="next"/> is <c>null</c>.</exception>
-        public CustomCorrelationMiddleware(
+        public CorrelationMiddleware(
             RequestDelegate next,
-            ILogger<CustomCorrelationMiddleware> logger)
+            ILogger<CorrelationMiddleware> logger)
         {
             Guard.NotNull(next, nameof(next), "Requires a continuation delegate");
             Guard.NotNull(logger, nameof(logger), "Requires a logger instance");
@@ -43,7 +43,7 @@ namespace Arcus.POC.WebApi.Logging.Correlation
         /// </returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="httpContext"/> or <paramref name="service"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">Thrown when the <paramref name="httpContext"/> response headers are <c>null</c>.</exception>
-        public async Task Invoke(HttpContext httpContext, CustomHttpCorrelation service)
+        public async Task Invoke(HttpContext httpContext, HttpCorrelation service)
         {
             Guard.NotNull(httpContext, nameof(httpContext));
             Guard.NotNull(service, nameof(service), "Requires the HTTP correlation service");

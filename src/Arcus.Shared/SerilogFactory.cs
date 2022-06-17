@@ -29,13 +29,9 @@ namespace Arcus.Shared
 
                 loggerConfiguration = loggerConfiguration.Enrich.WithCorrelationInfo(new CustomHttpCorrelationInfoAccessor(httpContextAccessor));
             }
-            else
-            {
-                loggerConfiguration = loggerConfiguration.Enrich.WithCorrelationInfo(serviceProvider);
-            }
 
             loggerConfiguration = loggerConfiguration.WriteTo.Console()
-                                                     .WriteTo.AzureApplicationInsightsWithInstrumentationKey(instrumentationKey);                                                  
+                                                     .WriteTo.AzureApplicationInsightsWithInstrumentationKey("973f6a63-486e-4c73-9c45-1b920bdd6107");                                                  
         }
     }
 }

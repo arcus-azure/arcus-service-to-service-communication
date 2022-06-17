@@ -17,14 +17,45 @@ namespace System.Net.Http
             {
                 var newDependencyId = Guid.NewGuid().ToString();
                 var correlationInfo = correlationInfoAccessor.GetCorrelationInfo();
-                var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
 
-                request.Headers.Add("Request-Id", upstreamOperationParentId);
+                // TODO: use new ID as future parent ID
+                // old:
+                //var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
+                // new:
+
+                request.Headers.Add("Request-Id", newDependencyId);
                 request.Headers.Add("X-Transaction-ID", correlationInfo?.TransactionId);
 
                 var response = await httpClient.SendAsync(request);
 
-                logger.LogHttpDependency(request, response.StatusCode, httpDependencyMeasurement, dependencyId: upstreamOperationParentId);
+                logger.LogHttpDependency(request, response.StatusCode, httpDependencyMeasurement, dependencyId: newDependencyId);
+
+                return response;
+            }
+        }
+
+        public static async Task<HttpResponseMessage> SendAndTrackDependencyAsync(
+            this HttpClient httpClient, 
+            string operationName, 
+            HttpRequestMessage request, 
+            CorrelationInfo correlationInfo, 
+            ILogger logger)
+        {
+            using (var httpDependencyMeasurement = DurationMeasurement.Start())
+            {
+                var newDependencyId = Guid.NewGuid().ToString();
+
+                // TODO: use new ID as future parent ID
+                // old:
+                //var upstreamOperationParentId = $"|{correlationInfo?.OperationId}.{newDependencyId}";
+                // new:
+
+                request.Headers.Add("Request-Id", newDependencyId);
+                request.Headers.Add("X-Transaction-ID", correlationInfo?.TransactionId);
+
+                var response = await httpClient.SendAsync(request);
+
+                logger.LogHttpDependency(request, response.StatusCode, httpDependencyMeasurement, dependencyId: newDependencyId);
 
                 return response;
             }

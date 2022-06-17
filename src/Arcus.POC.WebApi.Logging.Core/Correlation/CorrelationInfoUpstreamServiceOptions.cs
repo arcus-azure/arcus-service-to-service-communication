@@ -2,7 +2,7 @@
 using Arcus.Observability.Correlation;
 using GuardNet;
 
-namespace Arcus.POC.WebApi.Logging.Core.Correlation
+namespace Arcus.WebApi.Logging.Core.Correlation
 {
     /// <summary>
     /// Correlation options specific to the upstream services, used in the <see cref="CorrelationInfoOptions"/>.

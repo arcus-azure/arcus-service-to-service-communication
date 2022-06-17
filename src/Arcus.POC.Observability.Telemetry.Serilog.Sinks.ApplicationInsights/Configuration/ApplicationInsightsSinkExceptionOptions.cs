@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using GuardNet;
 
-namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Configuration
+namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Configuration
 {
     /// <summary>
     /// User-defined configuration options to influence the behavior of the Azure Application Insights Serilog sink while tracking exceptions.

@@ -25,7 +25,6 @@ namespace Arcus.Shared.Logging.Correlation
         private readonly ICorrelationInfoAccessor _correlationInfoAccessor;
         private readonly ILogger<CustomHttpCorrelation> _logger;
 
-        // TODO: Contribute Upstream: Regex to support having ":" in the IDs
         private static readonly Regex RequestIdRegex = 
             new Regex(@"^(\|)?([a-zA-Z0-9\:\-]+(\.[a-zA-Z0-9\:\-]+)?)+(_|\.)?$", RegexOptions.Compiled, matchTimeout: TimeSpan.FromSeconds(1));
 

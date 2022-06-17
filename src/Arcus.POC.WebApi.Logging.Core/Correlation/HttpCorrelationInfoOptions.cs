@@ -1,11 +1,11 @@
 ﻿using Arcus.Observability.Correlation;
 
-namespace Arcus.POC.WebApi.Logging.Core.Correlation
+namespace Arcus.WebApi.Logging.Core.Correlation
 {
     /// <summary>
     ///  Options for handling correlation ID on incoming HTTP requests.
     /// </summary>
-    public class CustomHttpCorrelationInfoOptions : CorrelationInfoOptions
+    public class HttpCorrelationInfoOptions : CorrelationInfoOptions
     {
         /// <summary>
         /// Gets the correlation options specific for the upstream service.

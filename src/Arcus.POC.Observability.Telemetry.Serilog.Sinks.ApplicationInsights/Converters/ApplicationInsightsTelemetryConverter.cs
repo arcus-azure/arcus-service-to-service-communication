@@ -1,29 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Arcus.Observability.Telemetry.Core;
-using Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Configuration;
+using Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Configuration;
 using GuardNet;
 using Microsoft.ApplicationInsights.Channel;
 using Serilog.Events;
 using Serilog.Sinks.ApplicationInsights.Sinks.ApplicationInsights.TelemetryConverters;
 
-namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
+namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
 {
     /// <summary>
     /// Represents a general conversion from Serilog <see cref="LogEvent"/> instances to Application Insights <see cref="ITelemetry"/> instances.
     /// </summary>
     public class ApplicationInsightsTelemetryConverter : TelemetryConverterBase
     {
+        private readonly RequestTelemetryConverter _requestTelemetryConverter;
         private readonly ExceptionTelemetryConverter _exceptionTelemetryConverter;
         private readonly TraceTelemetryConverter _traceTelemetryConverter = new TraceTelemetryConverter();
         private readonly EventTelemetryConverter _eventTelemetryConverter = new EventTelemetryConverter();
         private readonly MetricTelemetryConverter _metricTelemetryConverter = new MetricTelemetryConverter();
-        private readonly RequestTelemetryConverter _requestTelemetryConverter = new RequestTelemetryConverter();
         private readonly DependencyTelemetryConverter _dependencyTelemetryConverter = new DependencyTelemetryConverter();
 
         private ApplicationInsightsTelemetryConverter(ApplicationInsightsSinkOptions options)
         {
             Guard.NotNull(options, nameof(options), "Requires a set of options to influence how to track to Application Insights");
+            _requestTelemetryConverter = new RequestTelemetryConverter(options.Request);
             _exceptionTelemetryConverter = new ExceptionTelemetryConverter(options.Exception);
         }
         

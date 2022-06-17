@@ -6,7 +6,7 @@ using GuardNet;
 using Microsoft.ApplicationInsights.DataContracts;
 using Serilog.Events;
 
-namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
+namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
 {
     /// <summary>
     /// Represents a conversion from a Serilog <see cref="LogEvent"/> to an Application Insights <see cref="EventTelemetry"/> instance.

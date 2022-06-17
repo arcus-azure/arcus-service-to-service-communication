@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Arcus.Messaging.Abstractions;
 using Arcus.Observability.Correlation;
 using Arcus.Shared.Services.Interfaces;
 using GuardNet;
@@ -37,12 +38,17 @@ namespace Arcus.Shared.Services
             var url = _configuration["Bacon_API_Url"];
 
             var requestUri = $"http://{url}/api/v1/bacon";
+            //var requestUri = $"http://localhost:789/api/v1/bacon";
 
             _logger.LogInformation($"Requesting BACON at {requestUri}");
 
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
-            var response = await SendHttpRequestAsync("Get Bacon", request);
+            var httpClient = _httpClientFactory.CreateClient();
+            var response = await httpClient.SendAndTrackDependencyAsync("Get Bacon", request, _correlationInfoAccessor, _logger);
+
+            _logger.LogInformation("Calling bacon API completed with status:" + response.StatusCode);
+
             if (response.IsSuccessStatusCode == false)
             {
                 throw new Exception("Unable to get bacon");
@@ -52,14 +58,29 @@ namespace Arcus.Shared.Services
             return JsonConvert.DeserializeObject<List<string>>(rawResponse);
         }
 
-        private async Task<HttpResponseMessage> SendHttpRequestAsync(string operationName, HttpRequestMessage request)
+        public async Task<List<string>> GetBaconAsync(MessageCorrelationInfo messageCorrelationInfo)
         {
+            var url = _configuration["Bacon_API_Url"];
+
+            var requestUri = $"http://{url}/api/v1/bacon";
+            //var requestUri = $"http://localhost:789/api/v1/bacon";
+
+            _logger.LogInformation($"Requesting BACON at {requestUri}");
+
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
             var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.SendAndTrackDependencyAsync(operationName, request, _correlationInfoAccessor, _logger);
+            var response = await httpClient.SendAndTrackDependencyAsync("Get Bacon", request, messageCorrelationInfo, _logger);
 
             _logger.LogInformation("Calling bacon API completed with status:" + response.StatusCode);
 
-            return response;
+            if (response.IsSuccessStatusCode == false)
+            {
+                throw new Exception("Unable to get bacon");
+            }
+
+            var rawResponse = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<List<string>>(rawResponse);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Arcus.POC.WebApi.Logging
+namespace Arcus.WebApi.Logging
 {
     /// <summary>
     /// Represents a filter that determines what part of the request and response should be excluded from the request tracking while using the <see cref="RequestTrackingAttribute"/>.

@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Arcus.Observability.Correlation;
-using Arcus.POC.WebApi.Logging.Core.Correlation;
+using Arcus.WebApi.Logging.Core.Correlation;
 using GuardNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -17,21 +17,19 @@ namespace Arcus.WebApi.Logging.Correlation
     /// Provides the functionality to correlate HTTP requests and responses according to configured <see cref="CorrelationInfoOptions"/>,
     /// using the <see cref="ICorrelationInfoAccessor"/> to expose the result.
     /// </summary>
-    /// <seealso cref="CustomHttpCorrelationInfoAccessor"/>
-    [Obsolete("Use Arcus HttpCorrelation instead")]
-    public class CustomHttpCorrelation : ICorrelationInfoAccessor
+    /// <seealso cref="HttpCorrelationInfoAccessor"/>
+    public class HttpCorrelation : ICorrelationInfoAccessor
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly CustomHttpCorrelationInfoOptions _options;
-        private readonly ICorrelationInfoAccessor _correlationInfoAccessor;
-        private readonly ILogger<CustomHttpCorrelation> _logger;
+        private readonly HttpCorrelationInfoOptions _options;
+        private readonly ICorrelationInfoAccessor<CorrelationInfo> _correlationInfoAccessor;
+        private readonly ILogger<HttpCorrelation> _logger;
 
-        // TODO: Contribute Upstream: Regex to support having ":" in the IDs
         private static readonly Regex RequestIdRegex = 
-            new Regex(@"^(\|)?([a-zA-Z0-9\:\-]+(\.[a-zA-Z0-9\:\-]+)?)+(_|\.)?$", RegexOptions.Compiled, matchTimeout: TimeSpan.FromSeconds(1));
+            new Regex(@"^(\|)?([a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)?)+(_|\.)?$", RegexOptions.Compiled, matchTimeout: TimeSpan.FromSeconds(1));
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomHttpCorrelation"/> class.
+        /// Initializes a new instance of the <see cref="HttpCorrelation"/> class.
         /// </summary>
         /// <param name="options">The options controlling how the correlation should happen.</param>
         /// <param name="correlationInfoAccessor">The instance to set and retrieve the <see cref="CorrelationInfo"/> instance.</param>
@@ -39,11 +37,32 @@ namespace Arcus.WebApi.Logging.Correlation
         /// <param name="httpContextAccessor">The instance to have access to the current HTTP context.</param>
         /// <exception cref="ArgumentNullException">When any of the parameters are <c>null</c>.</exception>
         /// <exception cref="ArgumentException">When the <paramref name="options"/> doesn't contain a non-<c>null</c> <see cref="IOptions{TOptions}.Value"/></exception>
-        public CustomHttpCorrelation(
-            IOptions<CustomHttpCorrelationInfoOptions> options,
+        public HttpCorrelation(
+            IOptions<HttpCorrelationInfoOptions> options,
             IHttpContextAccessor httpContextAccessor,
-            ICorrelationInfoAccessor correlationInfoAccessor,
-            ILogger<CustomHttpCorrelation> logger)
+            IHttpCorrelationInfoAccessor correlationInfoAccessor,
+            ILogger<HttpCorrelation> logger)
+#pragma warning disable CS0618 // Until we can remove the other constructor.
+            : this(options, httpContextAccessor, (ICorrelationInfoAccessor<CorrelationInfo>) correlationInfoAccessor, logger)
+#pragma warning restore CS0618
+        {
+        }
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpCorrelation"/> class.
+        /// </summary>
+        /// <param name="options">The options controlling how the correlation should happen.</param>
+        /// <param name="correlationInfoAccessor">The instance to set and retrieve the <see cref="CorrelationInfo"/> instance.</param>
+        /// <param name="logger">The logger to trace diagnostic messages during the correlation.</param>
+        /// <param name="httpContextAccessor">The instance to have access to the current HTTP context.</param>
+        /// <exception cref="ArgumentNullException">When any of the parameters are <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">When the <paramref name="options"/> doesn't contain a non-<c>null</c> <see cref="IOptions{TOptions}.Value"/></exception>
+        [Obsolete("Use the constructor overload with the " + nameof(IHttpCorrelationInfoAccessor) + " instead")]
+        public HttpCorrelation(
+            IOptions<HttpCorrelationInfoOptions> options,
+            IHttpContextAccessor httpContextAccessor,
+            ICorrelationInfoAccessor<CorrelationInfo> correlationInfoAccessor,
+            ILogger<HttpCorrelation> logger)
         {
             Guard.NotNull(options, nameof(options), "Requires a set of options to configure the correlation process");
             Guard.NotNull(httpContextAccessor, nameof(httpContextAccessor), "Requires a HTTP context accessor to get the current HTTP context");
@@ -53,7 +72,52 @@ namespace Arcus.WebApi.Logging.Correlation
             _httpContextAccessor = httpContextAccessor;
             _options = options.Value;
             _correlationInfoAccessor = correlationInfoAccessor;
-            _logger = logger ?? NullLogger<CustomHttpCorrelation>.Instance;
+            _logger = logger ?? NullLogger<HttpCorrelation>.Instance;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpCorrelation"/> class.
+        /// </summary>
+        /// <param name="options">The options controlling how the correlation should happen.</param>
+        /// <param name="correlationInfoAccessor">The instance to set and retrieve the <see cref="CorrelationInfo"/> instance.</param>
+        /// <param name="logger">The logger to trace diagnostic messages during the correlation.</param>
+        /// <param name="httpContextAccessor">The instance to have access to the current HTTP context.</param>
+        /// <exception cref="ArgumentNullException">When any of the parameters are <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">When the <paramref name="options"/> doesn't contain a non-<c>null</c> <see cref="IOptions{TOptions}.Value"/></exception>
+        [Obsolete("Use the constructor overload with the " + nameof(HttpCorrelationInfoOptions) + " instead")]
+        public HttpCorrelation(
+            IOptions<CorrelationInfoOptions> options,
+            IHttpContextAccessor httpContextAccessor,
+            ICorrelationInfoAccessor<CorrelationInfo> correlationInfoAccessor,
+            ILogger<HttpCorrelation> logger)
+            : this(Options.Create(CreateHttpCorrelationOptions(options?.Value)), httpContextAccessor, correlationInfoAccessor, logger)
+        {
+        }
+
+        private static HttpCorrelationInfoOptions CreateHttpCorrelationOptions(CorrelationInfoOptions options)
+        {
+            if (options is null)
+            {
+                return new HttpCorrelationInfoOptions();
+            }
+            
+            return new HttpCorrelationInfoOptions
+            {
+                Operation =
+                {
+                    GenerateId = options.Operation.GenerateId,
+                    HeaderName = options.Operation.HeaderName,
+                    IncludeInResponse = options.Operation.IncludeInResponse
+                },
+                Transaction =
+                {
+                    GenerateId = options.Transaction.GenerateId,
+                    HeaderName = options.Transaction.HeaderName,
+                    IncludeInResponse = options.Transaction.IncludeInResponse,
+                    AllowInRequest = options.Transaction.AllowInRequest,
+                    GenerateWhenNotSpecified = options.Transaction.GenerateWhenNotSpecified
+                }
+            };
         }
 
         /// <summary>
@@ -109,20 +173,26 @@ namespace Arcus.WebApi.Logging.Correlation
             string transactionId = DetermineTransactionId(transactionIds);
             string operationId, operationParentId = null;
 
-            if (_options.UpstreamService.ExtractFromRequest && TryGetUpstreamOperationId(httpContext, out operationParentId))
-            {
-                operationId = ExtractOperationIdFromOperationParentId(operationParentId);
-                if (operationId is null)
-                {
-                    _logger.LogError("No operation parent ID with a correct format could be found in the request header '{HeaderName}' which means no operation ID could be extracted", _options.UpstreamService.OperationParentIdHeaderName);
-                    errorMessage = $"No correlation operation ID could be extracted from upstream service's '{_options.UpstreamService.OperationParentIdHeaderName}' request header";
-                    return false;
-                }
-            }
-            else
-            {
-                operationId = DetermineOperationIdWithoutUpstreamService(httpContext);
-            }
+            // TODO: generate a new operation ID and use received operation ID as parent
+            // old:
+            //if (_options.UpstreamService.ExtractFromRequest && TryGetUpstreamOperationId(httpContext, out operationParentId))
+            //{
+            //    operationId = ExtractOperationIdFromOperationParentId(operationParentId);
+            //    if (operationId is null)
+            //    {
+            //        _logger.LogError("No operation parent ID with a correct format could be found in the request header '{HeaderName}' which means no operation ID could be extracted", _options.UpstreamService.OperationParentIdHeaderName);
+            //        errorMessage = $"No correlation operation ID could be extracted from upstream service's '{_options.UpstreamService.OperationParentIdHeaderName}' request header";
+            //        return false;
+            //    }
+            //}
+            //else
+            //{
+            //    operationId = DetermineOperationIdWithoutUpstreamService(httpContext);
+            //}
+            // new:
+            operationParentId = httpContext.Request.Headers[_options.UpstreamService.OperationParentIdHeaderName];
+            operationId = DetermineOperationIdWithoutUpstreamService(httpContext);
+            _logger.LogTrace("Correlation: {OperationId}, {TransactionId}, {OperationParentId}", operationId, transactionId, operationParentId);
 
             httpContext.Features.Set(new CorrelationInfo(operationId, transactionId, operationParentId));
             AddCorrelationResponseHeaders(httpContext);
@@ -163,19 +233,14 @@ namespace Arcus.WebApi.Logging.Correlation
 
         private bool TryGetUpstreamOperationId(HttpContext context, out string operationParentId)
         {
-            if (context.Request.Headers.TryGetValue(_options.UpstreamService.OperationParentIdHeaderName,
-                    out StringValues requestId)
+            if (context.Request.Headers.TryGetValue(_options.UpstreamService.OperationParentIdHeaderName, out StringValues requestId) 
                 && !String.IsNullOrWhiteSpace(requestId)
-                && requestId.Count > 0)
+                && requestId.Count > 0
+                && MatchesRequestIdFormat(requestId))
             {
-                if (MatchesRequestIdFormat(requestId))
-                {
-                    _logger.LogTrace(
-                        "Found operation parent ID '{OperationParentId}' from upstream service in request's header '{HeaderName}'",
-                        requestId, _options.UpstreamService.OperationParentIdHeaderName);
-                    operationParentId = requestId;
-                    return true;
-                }
+                _logger.LogTrace("Found operation parent ID '{OperationParentId}' from upstream service in request's header '{HeaderName}'", requestId, _options.UpstreamService.OperationParentIdHeaderName);
+                operationParentId = requestId;
+                return true;
             }
 
             _logger.LogTrace("No operation parent ID found from upstream service in the request's header '{HeaderName}' that matches the expected format: |Guid.", _options.UpstreamService.OperationParentIdHeaderName);
@@ -260,7 +325,16 @@ namespace Arcus.WebApi.Logging.Correlation
                 httpContext.Response.OnStarting(() =>
                 {
                     CorrelationInfo correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
-                    AddResponseHeader(httpContext, _options.Operation.HeaderName, correlationInfo.OperationId);
+
+                    if (String.IsNullOrWhiteSpace(correlationInfo?.OperationId))
+                    {
+                        _logger.LogWarning("No response header was added given no operation correlation ID was found");
+                    }
+                    else
+                    {
+                        AddResponseHeader(httpContext, _options.Operation.HeaderName, correlationInfo.OperationId);
+                    }
+
                     return Task.CompletedTask;
                 });
             }
@@ -271,7 +345,16 @@ namespace Arcus.WebApi.Logging.Correlation
                 httpContext.Response.OnStarting(() =>
                 {
                     CorrelationInfo correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
-                    AddResponseHeader(httpContext, _options.Transaction.HeaderName, correlationInfo.TransactionId);
+
+                    if (String.IsNullOrWhiteSpace(correlationInfo?.TransactionId))
+                    {
+                        _logger.LogWarning("No response header was added given no transactional correlation ID was found");
+                    }
+                    else
+                    {
+                        AddResponseHeader(httpContext, _options.Transaction.HeaderName, correlationInfo.TransactionId);
+                    }
+
                     return Task.CompletedTask;
                 });
             }

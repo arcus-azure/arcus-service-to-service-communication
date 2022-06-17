@@ -1,9 +1,11 @@
-﻿using Arcus.Observability.Telemetry.Core;
+﻿using System;
+using Arcus.Observability.Telemetry.Core;
 using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Serilog.Events;
 
-namespace Arcus.POC.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
+namespace Arcus.Observability.Telemetry.Serilog.Sinks.ApplicationInsights.Converters
 {
     /// <summary>
     /// Represents a conversion from the Cloud-related logging information to the Application Insights <see cref="CloudContext"/> instance.

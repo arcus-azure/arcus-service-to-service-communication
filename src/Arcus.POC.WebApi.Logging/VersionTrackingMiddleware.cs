@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Arcus.Observability.Telemetry.Core;
+using Arcus.Observability.Telemetry.Serilog.Enrichers;
 using GuardNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Arcus.POC.WebApi.Logging
+namespace Arcus.WebApi.Logging
 {
     /// <summary>
     /// Version tracking middleware component to automatically add the version of the application to the response.
@@ -14,7 +15,7 @@ namespace Arcus.POC.WebApi.Logging
     /// <remarks>
     ///     WARNING: Only use the version tracking for non-public endpoints otherwise the version information is leaked and it can be used for unintended malicious purposes.
     /// </remarks>
-    public class CustomVersionTrackingMiddleware
+    public class VersionTrackingMiddleware
     {
         private readonly IAppVersion _appVersion;
         private readonly VersionTrackingOptions _options;
@@ -22,18 +23,18 @@ namespace Arcus.POC.WebApi.Logging
         private readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomVersionTrackingMiddleware"/> class.
+        /// Initializes a new instance of the <see cref="VersionTrackingMiddleware"/> class.
         /// </summary>
         /// <param name="appVersion">The instance to retrieve the current application version.</param>
         /// <param name="options">The configurable options to specify how the version should be tracked in the response.</param>
         /// <param name="next">The next functionality in the request pipeline to be executed.</param>
         /// <param name="logger">The logger to write diagnostic trace messages during the addition of the application version to the response.</param>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="appVersion"/>, <paramref name="options"/>, or <paramref name="next"/> is <c>null</c>.</exception>
-        public CustomVersionTrackingMiddleware(
+        public VersionTrackingMiddleware(
             IAppVersion appVersion,
             VersionTrackingOptions options,
             RequestDelegate next,
-            ILogger<CustomVersionTrackingMiddleware> logger)
+            ILogger<VersionTrackingMiddleware> logger)
         {
             Guard.NotNull(appVersion, nameof(appVersion), "Requires an instance to retrieve the current application version to add the version to the response");
             Guard.NotNull(next, nameof(next), "Requires a continuation delegate to move towards the next functionality in the request pipeline");
@@ -42,7 +43,7 @@ namespace Arcus.POC.WebApi.Logging
             _appVersion = appVersion;
             _options = options;
             _next = next;
-            _logger = logger ?? NullLogger<CustomVersionTrackingMiddleware>.Instance;
+            _logger = logger ?? NullLogger<VersionTrackingMiddleware>.Instance;
         }
 
         /// <summary>
