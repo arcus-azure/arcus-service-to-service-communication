@@ -31,7 +31,7 @@ namespace Arcus.Shared
             }
 
             loggerConfiguration = loggerConfiguration.WriteTo.Console()
-                                                     .WriteTo.AzureApplicationInsightsWithInstrumentationKey("973f6a63-486e-4c73-9c45-1b920bdd6107");                                                  
+                                                     .WriteTo.AzureApplicationInsightsWithInstrumentationKey(instrumentationKey);
         }
     }
 }
