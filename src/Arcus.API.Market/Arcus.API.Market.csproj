@@ -29,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<ProjectReference Include="..\Arcus.POC.WebApi.Logging\Arcus.POC.WebApi.Logging.csproj" />-->
     <ProjectReference Include="..\Arcus.Shared\Arcus.Shared.csproj" />
   </ItemGroup>
 
