@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DocumentationFile>Arcus.API.Bacon.Open-Api.xml</DocumentationFile>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
@@ -19,13 +19,13 @@
   <ItemGroup>
     <PackageReference Include="Arcus.Security.Core" Version="1.7.0" />
     <PackageReference Include="Arcus.Security.Providers.AzureKeyVault" Version="1.7.0" />
+    <PackageReference Include="Arcus.WebApi.Logging" Version="1.6.1-preview-1" />
     <PackageReference Include="Bogus" Version="33.0.2" />
     <PackageReference Include="Guard.NET" Version="1.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.14" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Arcus.POC.WebApi.Logging\Arcus.POC.WebApi.Logging.csproj" />
     <ProjectReference Include="..\Arcus.Shared\Arcus.Shared.csproj" />
   </ItemGroup>
 
