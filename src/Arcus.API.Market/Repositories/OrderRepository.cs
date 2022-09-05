@@ -64,18 +64,7 @@ namespace Arcus.API.Market.Repositories
                     var serviceBusEndpoint = _serviceBusOrderSender.FullyQualifiedNamespace;
                     string entityPath = _serviceBusOrderSender.EntityPath;
                     _logger.LogInformation($"Done sending at {DateTimeOffset.UtcNow}");
-                    //_logger.LogServiceBusQueueDependency(serviceBusEndpoint, entityPath, isSuccessful, serviceBusDependencyMeasurement, dependencyId: newDependencyId);
-                    _logger.LogWarning(MessageFormats.DependencyFormat, new DependencyLogEntry(
-                        "Azure Service Bus",
-                        entityPath,
-                        null,
-                        entityPath,
-                        newDependencyId,
-                        serviceBusDependencyMeasurement.Elapsed,
-                        serviceBusDependencyMeasurement.StartTime,
-                        null,
-                        isSuccessful,
-                        new Dictionary<string, object>()));
+                    _logger.LogServiceBusQueueDependency(serviceBusEndpoint, entityPath, isSuccessful, serviceBusDependencyMeasurement, dependencyId: newDependencyId);
                 }
             }
         }
