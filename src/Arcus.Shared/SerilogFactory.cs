@@ -25,9 +25,7 @@ namespace Arcus.Shared
 
             if (useHttpCorrelation)
             {
-                var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
-
-                loggerConfiguration = loggerConfiguration.Enrich.WithCorrelationInfo(new CustomHttpCorrelationInfoAccessor(httpContextAccessor));
+                loggerConfiguration = loggerConfiguration.Enrich.WithHttpCorrelationInfo(serviceProvider);
             }
 
             loggerConfiguration = loggerConfiguration.WriteTo.Console()

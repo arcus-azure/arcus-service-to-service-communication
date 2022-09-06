@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Arcus.API.Market.Extensions;
 using Arcus.API.Market.Repositories.Interfaces;
 using Arcus.Observability.Correlation;
 using Arcus.Observability.Telemetry.Core;
+using Arcus.Observability.Telemetry.Core.Logging;
 using Arcus.Shared.Messages;
 using GuardNet;
 using Microsoft.Extensions.Logging;
@@ -44,7 +46,7 @@ namespace Arcus.API.Market.Repositories
                 var correlationInfo = _correlationInfoAccessor.GetCorrelationInfo();
                 var newOperationId = $"operation-{Guid.NewGuid()}";
                 var newDependencyId = Guid.NewGuid().ToString();
-                
+
                 try
                 {
                     var serviceBusMessage = ServiceBusMessageBuilder.CreateForBody(orderRequest)
@@ -60,8 +62,9 @@ namespace Arcus.API.Market.Repositories
                 finally
                 {
                     var serviceBusEndpoint = _serviceBusOrderSender.FullyQualifiedNamespace;
+                    string entityPath = _serviceBusOrderSender.EntityPath;
                     _logger.LogInformation($"Done sending at {DateTimeOffset.UtcNow}");
-                    _logger.LogServiceBusQueueDependency(_serviceBusOrderSender.EntityPath, isSuccessful, serviceBusDependencyMeasurement, dependencyId: newDependencyId);
+                    _logger.LogServiceBusQueueDependency(serviceBusEndpoint, entityPath, isSuccessful, serviceBusDependencyMeasurement, dependencyId: newDependencyId);
                 }
             }
         }

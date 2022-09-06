@@ -45,7 +45,15 @@ namespace Arcus.API.Bacon.Repositories
                 finally
                 {
                     // Normally you would do it in the repo but ok
-                    _logger.LogSqlDependency("example-server", "bacon-db", "flavors", isSuccessful: true, operationName: "Get Bacon", startTime: durationMeasurement.StartTime , duration: durationMeasurement.Elapsed);
+                    _logger.LogSqlDependency(
+                        "example-server", 
+                        "bacon-db", 
+                        sqlCommand: "GET FlavorName FROM Flavors", 
+                        isSuccessful: true, 
+                        operationName: "Get Bacon Flavors", 
+                        startTime: durationMeasurement.StartTime , 
+                        duration: durationMeasurement.Elapsed,
+                        dependencyId: null);
                 }
             }
 

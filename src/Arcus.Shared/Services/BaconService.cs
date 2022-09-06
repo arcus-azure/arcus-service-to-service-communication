@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Arcus.Messaging.Abstractions;
 using Arcus.Observability.Correlation;
 using Arcus.Shared.Services.Interfaces;
+using Arcus.WebApi.Logging.Core.Correlation;
 using GuardNet;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -36,16 +37,13 @@ namespace Arcus.Shared.Services
         public async Task<List<string>> GetBaconAsync()
         {
             var url = _configuration["Bacon_API_Url"];
-
             var requestUri = $"http://{url}/api/v1/bacon";
-            //var requestUri = $"http://localhost:789/api/v1/bacon";
-
             _logger.LogInformation($"Requesting BACON at {requestUri}");
 
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
-            var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.SendAndTrackDependencyAsync("Get Bacon", request, _correlationInfoAccessor, _logger);
+            var httpClient = _httpClientFactory.CreateClient("Bacon API");
+            var response = await httpClient.SendAsync(request);
 
             _logger.LogInformation("Calling bacon API completed with status:" + response.StatusCode);
 
@@ -63,14 +61,13 @@ namespace Arcus.Shared.Services
             var url = _configuration["Bacon_API_Url"];
 
             var requestUri = $"http://{url}/api/v1/bacon";
-            //var requestUri = $"http://localhost:789/api/v1/bacon";
 
             _logger.LogInformation($"Requesting BACON at {requestUri}");
 
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.SendAndTrackDependencyAsync("Get Bacon", request, messageCorrelationInfo, _logger);
+            var response = await httpClient.SendAsync(request, messageCorrelationInfo, _logger);
 
             _logger.LogInformation("Calling bacon API completed with status:" + response.StatusCode);
 

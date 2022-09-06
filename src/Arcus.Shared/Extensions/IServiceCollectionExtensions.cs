@@ -15,14 +15,15 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static void AddBaconApiIntegration(this IServiceCollection services)
         {
-            services.AddHttpClient();
+            services.AddHttpClient("Bacon API")
+                    .WithHttpCorrelationTracking();
 
             // TODO: Contribute Upstream - HTTP service-to-service automagical tracking - Option #1 - Use HTTP pipeline, if we can fix the DI scoping for all scenarios
             // Remove name requirement as this is an extension workaround
             // https://thomaslevesque.com/2016/12/08/fun-with-the-httpclient-pipeline/
             // services.AddTransient<DependencyTrackingHttpHandler>();
             //services.AddHttpClient("SomeName")
-                      //.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredService<DependencyTrackingHttpHandler>());
+            //.AddHttpMessageHandler(serviceProvider => serviceProvider.GetRequiredService<DependencyTrackingHttpHandler>());
 
             services.AddScoped<IBaconService, BaconService>();
         }
