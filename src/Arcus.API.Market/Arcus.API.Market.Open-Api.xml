@@ -41,15 +41,5 @@
             <response code="201">Order is created</response>
             <response code="503">Uh-oh! Things went wrong</response>
         </member>
-        <member name="M:Arcus.API.Market.Extensions.ObjectExtensions.AsServiceBusMessage(System.Object,System.String,System.String,System.String,System.Text.Encoding)">
-            <summary>
-                Creates an Azure Service Bus Message for a message body
-            </summary>
-            <param name="messageBody">Body of the Service Bus message to process</param>
-            <param name="operationId">Unique identifier that spans one operation end-to-end</param>
-            <param name="transactionId">Unique identifier that spans one or more operations and are considered a transaction/session</param>
-            <param name="encoding">Encoding to use during serialization. Defaults to UTF8</param>
-            <returns>Azure Service Bus Message</returns>
-        </member>
     </members>
 </doc>

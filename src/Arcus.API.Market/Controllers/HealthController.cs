@@ -1,4 +1,6 @@
 ﻿using System.Threading.Tasks;
+using Arcus.Shared.ExampleProviders;
+using Arcus.Shared.Models;
 using GuardNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,15 +36,19 @@ namespace Arcus.API.Market.Controllers
         /// <response code="200">API is healthy</response>
         /// <response code="503">API is unhealthy or in degraded state</response>
         [HttpGet(Name = "Health_Get")]        
-        [SwaggerResponseHeader(200, "RequestId", "string", "The header that has a request ID that uniquely identifies this operation call")]
-        [SwaggerResponseHeader(200, "X-Transaction-Id", "string", "The header that has the transaction ID is used to correlate multiple operation calls.")]
+        [ProducesResponseType(typeof(ApiHealthReport), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiHealthReport), StatusCodes.Status503ServiceUnavailable)]
+        [SwaggerResponseHeader(200, "X-Transaction-ID", "string", "The header that has the transaction ID is used to correlate multiple operation calls")]
+        [SwaggerResponseHeader(200, "X-Operation-ID", "string", "The header that has the operation ID is used to uniquely identify this single call")]
+        [SwaggerResponseExample(200, typeof(HealthReportResponseExampleProvider))]
         public async Task<IActionResult> Get()
         {
             HealthReport healthReport = await _healthCheckService.CheckHealthAsync();
-            
+            ApiHealthReport json = ApiHealthReport.FromHealthReport(healthReport);
+
             if (healthReport?.Status == HealthStatus.Healthy)
             {
-                return Ok(healthReport);
+                return Ok(json);
             }
             else
             {
