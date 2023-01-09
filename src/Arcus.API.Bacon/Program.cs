@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Arcus.API.Bacon.Repositories;
 using Arcus.API.Bacon.Repositories.Interfaces;
 using Arcus.Security.Core;
-using Arcus.Security.Core.Caching.Configuration;
-using Arcus.Shared;
 using Arcus.Shared.ExampleProviders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -154,9 +152,8 @@ namespace Arcus.API.Bacon
         private static async Task ConfigureSerilogAsync(WebApplication app)
         {
             var secretProvider = app.Services.GetRequiredService<ISecretProvider>();
-            //string connectionString = await secretProvider.GetRawSecretAsync("APPINSIGHTS_INSTRUMENTATIONKEY");
-            string connectionString = app.Configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
-            
+            string connectionString = await secretProvider.GetRawSecretAsync(ApplicationInsightsConnectionStringKeyName);
+
             var reloadLogger = (ReloadableLogger) Log.Logger;
             reloadLogger.Reload(config =>
             {
@@ -170,7 +167,7 @@ namespace Arcus.API.Bacon
             
                 if (!string.IsNullOrWhiteSpace(connectionString))
                 {
-                    config.WriteTo.AzureApplicationInsightsWithConnectionString(app.Services, "InstrumentationKey=" + connectionString);
+                    config.WriteTo.AzureApplicationInsightsWithConnectionString(app.Services, connectionString);
                 }
                 
                 return config;

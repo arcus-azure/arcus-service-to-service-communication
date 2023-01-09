@@ -78,9 +78,8 @@ namespace Arcus.Workers.Orders
         private static async Task ConfigureSerilogAsync(IHost host)
         {
             var secretProvider = host.Services.GetRequiredService<ISecretProvider>();
-            //string connectionString = await secretProvider.GetRawSecretAsync("APPINSIGHTS_INSTRUMENTATIONKEY");
-            string connectionString = host.Services.GetRequiredService<IConfiguration>()["APPINSIGHTS_INSTRUMENTATIONKEY"];
-            
+            string connectionString = await secretProvider.GetRawSecretAsync(ApplicationInsightsConnectionStringKeyName);
+
             var reloadLogger = (ReloadableLogger) Log.Logger;
             reloadLogger.Reload(config =>
             {
@@ -93,7 +92,7 @@ namespace Arcus.Workers.Orders
                 
                 if (!string.IsNullOrWhiteSpace(connectionString))
                 {
-                    config.WriteTo.AzureApplicationInsightsWithConnectionString(host.Services, "InstrumentationKey=" + connectionString);
+                    config.WriteTo.AzureApplicationInsightsWithConnectionString(host.Services, connectionString);
                 }
                 
                 return config;

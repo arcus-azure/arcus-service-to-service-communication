@@ -1,9 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Arcus.API.Bacon.Repositories.Interfaces;
 using GuardNet;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Filters;
 

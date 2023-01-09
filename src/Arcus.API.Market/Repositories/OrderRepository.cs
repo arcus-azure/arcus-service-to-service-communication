@@ -44,7 +44,7 @@ namespace Arcus.API.Market.Repositories
             }
             finally
             {
-                _logger.LogInformation($"Done sending at {DateTimeOffset.UtcNow}");
+                _logger.LogInformation("Done sending at {Time}", DateTimeOffset.UtcNow);
             }
         }
     }

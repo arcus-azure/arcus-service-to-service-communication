@@ -118,14 +118,13 @@ namespace Arcus.API.Market
             builder.Services.AddHttpClient("Bacon API");
             builder.Services.AddAzureClients(options => 
             {
-                var serviceBusConnectionString = configuration["SERVICEBUS_CONNECTIONSTRING"];
-                options.AddServiceBusClient(connectionString: serviceBusConnectionString);
+                options.AddServiceBusClient("SERVICEBUS_CONNECTIONSTRING");
             });
 
             ConfigureOpenApi(builder);
         }
 
-       private static void ConfigureOpenApi(WebApplicationBuilder builder)
+        private static void ConfigureOpenApi(WebApplicationBuilder builder)
         {
             var openApiInformation = new OpenApiInfo
             {
@@ -154,6 +153,7 @@ namespace Arcus.API.Market
             
             builder.Host.ConfigureSecretStore((context, config, stores) =>
             {
+                stores.AddEnvironmentVariables();
                 stores.AddConfiguration(config);
             });
 
@@ -163,8 +163,7 @@ namespace Arcus.API.Market
         private static async Task ConfigureSerilogAsync(WebApplication app)
         {
             var secretProvider = app.Services.GetRequiredService<ISecretProvider>();
-            //string connectionString = await secretProvider.GetRawSecretAsync("APPINSIGHTS_INSTRUMENTATIONKEY");
-            string connectionString = app.Configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
+            string connectionString = await secretProvider.GetRawSecretAsync(ApplicationInsightsConnectionStringKeyName);
 
             var reloadLogger = (ReloadableLogger) Log.Logger;
             reloadLogger.Reload(config =>
@@ -179,7 +178,7 @@ namespace Arcus.API.Market
             
                 if (!string.IsNullOrWhiteSpace(connectionString))
                 {
-                    config.WriteTo.AzureApplicationInsightsWithConnectionString(app.Services, "InstrumentationKey=" + connectionString);
+                    config.WriteTo.AzureApplicationInsightsWithConnectionString(app.Services, connectionString);
                 }
                 
                 return config;
