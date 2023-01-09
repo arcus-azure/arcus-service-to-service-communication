@@ -1,11 +1,14 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.202-alpine3.10 AS base
+FROM mcr.microsoft.com/dotnet/sdk:6.0.301-alpine3.14 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.202-alpine3.10 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0.301-alpine3.14 AS build
 WORKDIR /src
 COPY ["./Arcus.Workers.Orders/Arcus.Workers.Orders.csproj", ""]
+
 COPY . .
+WORKDIR "/src/."
+RUN dotnet build "./Arcus.Workers.Orders/Arcus.Workers.Orders.csproj" -c Release -o /app
 
 FROM build AS publish
 RUN dotnet publish "./Arcus.Workers.Orders/Arcus.Workers.Orders.csproj" -c Release -o /app

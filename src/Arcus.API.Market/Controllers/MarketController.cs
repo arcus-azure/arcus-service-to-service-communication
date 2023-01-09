@@ -53,8 +53,8 @@ namespace Arcus.API.Market.Controllers
 
             await _orderRepository.OrderBaconAsync(orderRequest.Amount);
 
-            _logger.LogEvent("Order Created");
-            _logger.LogMetric("Order Created", 1);
+            _logger.LogCustomEvent("Order Created");
+            _logger.LogCustomMetric("Order Created", 1);
             
             return Accepted();
         }
